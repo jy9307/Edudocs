@@ -1,5 +1,6 @@
 from dotenv import load_dotenv
 import streamlit as st
+from typing import List
 from langchain_core.runnables import RunnablePassthrough
 from langchain.memory.buffer_window import ConversationBufferWindowMemory
 from langchain_core.output_parsers import StrOutputParser
@@ -40,7 +41,7 @@ class ChatCallbackHandler(BaseCallbackHandler):
         self.message_box.markdown(self.message)
 
 
-class BasicEdudocsPageTemplate() :
+class BasicChatbotPageTemplate() :
 
     def __init__(self, mh_instance, llm, page_name) :
 
@@ -105,8 +106,7 @@ class BasicEdudocsPageTemplate() :
     def set_chat_ui_with_retriever(self,
                                    prompt_name,
                                    basic_message,
-                                   retriever,
-                                   search_type='similarity') :
+                                   retriever) :
         
         #기본 출력 메세지 설정(AI가 제공) 
         self.mh.send_message(basic_message, "ai", self.page_name, save=False)
@@ -128,3 +128,36 @@ class BasicEdudocsPageTemplate() :
             with st.chat_message("ai"):
                 chain.invoke(message)
         
+class BasicInputBoxPageTemplate() :
+
+    def __init__(self, llm, page_name, mh_instance) :
+
+        self.message_cache_name = page_name+"_messages"
+
+        if self.message_cache_name not in st.session_state:
+            st.session_state[self.message_cache_name] = []
+
+        self.llm = llm
+        self.page_name = page_name
+        self.mh = mh_instance
+
+    def input_box(self, items: List[str]) : 
+
+        inputs = []
+        n = len(items)
+        for i,n in enumerate(items):
+            user_input = st.text_input(f"{n} 입력창", key= i)
+            inputs.append(user_input)
+
+    def run_button(self, button_name) :
+        if st.button(button_name):
+            st.write("입력된 내용:")
+        return
+   
+    def set_title(self, title, emoji) :
+        st.set_page_config(
+            page_title=title,
+            page_icon=emoji,
+        )
+
+        st.title(title)

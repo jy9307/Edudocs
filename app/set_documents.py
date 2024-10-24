@@ -8,6 +8,8 @@ from dotenv import load_dotenv
 from langchain_community.vectorstores.milvus import Milvus
 import os
 
+load_dotenv()
+
 class load_Document() :
 
     def __init__(self) -> None:
@@ -15,12 +17,12 @@ class load_Document() :
 
     def select_document(self, page_name) :
         
-        self.embedder = OpenAIEmbeddings(api_key='sk-proj-p6i01xc1aEXcJuDQK4NrT3BlbkFJUECFk0uxAI7YoBtTAHvh')
+        self.embedder = OpenAIEmbeddings()
         
         self.vectorstore = Milvus(
             embedding_function=self.embedder,
             collection_name=page_name,
-            connection_args={"uri": "http://localhost:19530"},
+            connection_args={"host": "3.39.234.177", "port": "19530"},
             )
         
         return self.vectorstore
