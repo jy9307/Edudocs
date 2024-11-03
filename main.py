@@ -41,7 +41,7 @@ pg = st.navigation(
             "법령 및 규정": [work_law, educational_laws],
             "교육과정" : [achievement_standard],
             "학생부" : [student_record] 
-        }
+                    }
     )
 
 pg.run()
