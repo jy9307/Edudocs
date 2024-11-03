@@ -7,24 +7,10 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 from uuid import uuid4
 from dotenv import load_dotenv
 
+import re
+
 load_dotenv()
 
-####----------Add metadata
-
-def add_metadata(docs, key, value) :
-    for i, d in enumerate(docs) :
-
-        d.metadata[key] = value
-
-####----------add metadata for achivement standards
-def add_as_metadata(docs) :
-    for i, d in enumerate(docs) :
-        meta_splitter = d.page_content.split(" ")
-
-        d.metadata['school'] = meta_splitter[0]
-        d.metadata['grade'] = meta_splitter[1]
-        d.metadata['subject'] = meta_splitter[2]
-        d.metadata['area'] = meta_splitter[3]
 
 def add_keyword_metadata(docs) :
 
@@ -72,6 +58,16 @@ def milvus_upload(collection_name, docs, drop_old=True) :
 
 ####--------- Upload achievement_standard
 
+####----------add metadata for achivement standards
+# def add_as_metadata(docs) :
+#     for i, d in enumerate(docs) :
+#         meta_splitter = d.page_content.split(" ")
+
+#         d.metadata['school'] = meta_splitter[0]
+#         d.metadata['grade'] = meta_splitter[1]
+#         d.metadata['subject'] = meta_splitter[2]
+#         d.metadata['area'] = meta_splitter[3]
+
 # splitter = RecursiveCharacterTextSplitter(
 #     chunk_size = 500,
 #     chunk_overlap = 200,
@@ -98,6 +94,21 @@ def milvus_upload(collection_name, docs, drop_old=True) :
 
 ####--------- Upload work_law
 
+####----------Add metadata
+
+def add_metadata(docs, key, value) :
+    for i, d in enumerate(docs) :
+        d.metadata[key] = value
+
+def add_law_name_metadata(docs) :
+    for i, d in enumerate(docs) :
+        match = re.search(r'\((.*?)\)', d.page_content)
+
+        if match:
+            d.metadata['article_name'] = match.group(1)  # 첫 번째 내용
+        else:
+            print("No match found")
+
 splitter = RecursiveCharacterTextSplitter(
     chunk_size = 500,
     chunk_overlap = 200,
@@ -121,10 +132,11 @@ for loader in loaders:  # loaders 리스트의 각 로더에 대해 반복합니
 
 add_metadata(docs_1, "link", "https://www.law.go.kr/%EB%B2%95%EB%A0%B9/%EA%B5%AD%EA%B0%80%EA%B3%B5%EB%AC%B4%EC%9B%90%20%EB%B3%B5%EB%AC%B4%EA%B7%9C%EC%A0%95")
 add_metadata(docs_1, "law_title", "국가공무원 복무규정")
+add_law_name_metadata(docs_1)
 
 loaders = [
     # 파일을 로드합니다.
-    TextLoader("./교육공무원법.txt"),
+    TextLoader("./교육공무원법_revised.txt"),
 ]
 
 docs_2 = []  # 빈 리스트를 생성합니다.
@@ -136,22 +148,10 @@ for loader in loaders:  # loaders 리스트의 각 로더에 대해 반복합니
 
 add_metadata(docs_2, "link", "https://www.law.go.kr/%EB%B2%95%EB%A0%B9/%EA%B5%90%EC%9C%A1%EA%B3%B5%EB%AC%B4%EC%9B%90%EB%B2%95")
 add_metadata(docs_2, "law_title", "교육공무원법")
+add_law_name_metadata(docs_2)
 
 docs = docs_1+docs_2
 milvus_upload("work_law",docs)
 
 
-
-
 # add_keyword_metadata(docs)
-
-
-
-
-
-
-
-
-
-
-
