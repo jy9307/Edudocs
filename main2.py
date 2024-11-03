@@ -36,11 +36,15 @@ student_record = st.Page("directory/student_record.py", title="학생부 기재�
 ### test
 test = st.Page("directory/test.py", title="연습")
 
+### 깊이있는수업 지도안 endpoint
+deep_lesson = st.Page("directory/deep_lesson.py", title="깊이있는수업 지도안 생성기", icon=":material/article:")
+
 pg = st.navigation(
         {   "계정 관리" : [account_page,help_page, test],
             "법령 및 규정": [work_law, educational_laws],
             "교육과정" : [achievement_standard],
-            "학생부" : [student_record] 
+            "학생부" : [student_record],
+            "깊이있는수업 지도안"  : [deep_lesson]
                     }
     )
 
