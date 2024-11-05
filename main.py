@@ -44,7 +44,7 @@ pg = st.navigation(
             "법령 및 규정": [work_law, educational_laws],
             "교육과정" : [achievement_standard],
             "학생부" : [student_record],
-            "깊이있는수업 지도안"  : [deep_lesson]
+            "깊이있는수업"  : [deep_lesson]
                     }
     )
 

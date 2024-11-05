@@ -132,3 +132,16 @@ aac_prompt =  ChatPromptTemplate.from_messages([
     Context: {context}"""),
      ("human", "{input}")
 ])
+
+deep_lesson_prompt =  ChatPromptTemplate.from_messages([
+    ("system", """"
+     아래 내용을 바탕으로 context의 자료를참고하여 양식에 맞춘 지도안을 작성해주세요.\n"
+     
+    양식
+    "교과: {subject}\n역량: {competency}\n성취기준: {achievement_standard}\n\n"
+    "핵심 아이디어:\n지식, 이해:\n과정, 기능:\n가치, 태도:\n핵심어:\n핵심 문장:\n핵심 질문:\n"
+     
+    context : {context}
+     """),
+     ("human", "{input}")
+])

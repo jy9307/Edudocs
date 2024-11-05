@@ -19,7 +19,6 @@ class MessageHandler() :
         if save:
             self.save_message(message, role, page)
 
-
 class ChatCallbackHandler(BaseCallbackHandler):
     def __init__(self, mh_instance,page_name):
         self.message = ""
@@ -36,7 +35,7 @@ class ChatCallbackHandler(BaseCallbackHandler):
         self.message += token
         self.message_box.markdown(self.message)
 
-
+# "챗봇"형태의 페이지를 작성하는 템플릿
 class BasicChatbotPageTemplate() :
 
     def __init__(self, mh_instance, llm, page_name) :
@@ -123,7 +122,8 @@ class BasicChatbotPageTemplate() :
             )
             with st.chat_message("ai"):
                 chain.invoke(message)
-        
+
+# "input box"형태의 페이지를 작성하는 템플릿
 class BasicInputBoxPageTemplate() :
 
     def __init__(self, llm, page_name, mh_instance) :
@@ -137,19 +137,6 @@ class BasicInputBoxPageTemplate() :
         self.page_name = page_name
         self.mh = mh_instance
 
-    def input_box(self, items: List[str]) : 
-
-        inputs = []
-        n = len(items)
-        for i,n in enumerate(items):
-            user_input = st.text_input(f"{n} 입력창", key= i)
-            inputs.append(user_input)
-
-    def run_button(self, button_name) :
-        if st.button(button_name):
-            st.write("입력된 내용:")
-        return
-   
     def set_title(self, title, emoji) :
         st.set_page_config(
             page_title=title,
@@ -157,3 +144,32 @@ class BasicInputBoxPageTemplate() :
         )
 
         st.title(title)
+
+    def input_box(self, items: List[str]) : 
+
+        self.inputs = []
+        n = len(items)
+        for i,n in enumerate(items):
+            user_input = st.text_input(f"{n} 입력창", key= i)
+            self.inputs.append(user_input)
+
+    def generate_button(self, prompt_name, button_name, variables : List[str], input = "Follow the prompt") :
+    
+        docs = load_Document()
+        retriever = docs.select_document(self.page_name).as_retriever()
+        context = retriever.batch([f"{self.inputs[0]},{self.inputs[1]},{self.inputs[2]}"])
+        variables =  {f"{variables[i]}": self.inputs[i] for i in range(len(self.inputs))}
+        if st.button(button_name):
+
+            chain = (
+                 prompt_name
+                | self.llm  
+                | StrOutputParser()
+            )
+
+            chain.invoke({
+                "context" : context[0],
+                **variables,
+                "input" : input
+                })
+        return

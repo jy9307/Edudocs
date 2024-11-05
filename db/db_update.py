@@ -152,6 +152,9 @@ for loader in loaders:  # loaders 리스트의 각 로더에 대해 반복합니
         loader.load_and_split()
     )  # 로더를 사용하여 문서를 로드하고 docs 리스트에 추가합니다.
 
+# for i in docs :
+#     print(i)
+
 milvus_upload("deep_lesson",docs)
 
 
