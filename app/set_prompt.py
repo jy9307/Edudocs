@@ -1,4 +1,4 @@
-from langchain_core.prompts import ChatPromptTemplate, FewShotChatMessagePromptTemplate,MessagesPlaceholder
+from langchain_core.prompts import ChatPromptTemplate, FewShotChatMessagePromptTemplate
 
 ## input output 예시
 as_examples = [

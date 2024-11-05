@@ -1,13 +1,9 @@
-from dotenv import load_dotenv
 import streamlit as st
 from typing import List
 from langchain_core.runnables import RunnablePassthrough
-from langchain.memory.buffer_window import ConversationBufferWindowMemory
 from langchain_core.output_parsers import StrOutputParser
 from langchain.callbacks.base import BaseCallbackHandler
 from app.set_documents import load_Document
-from app.set_prompt import el_prompt
-from langchain_openai import ChatOpenAI
 
 class MessageHandler() :
     def __init__(self) :
