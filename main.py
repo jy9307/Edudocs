@@ -39,9 +39,12 @@ test = st.Page("directory/test.py", title="연습")
 ### 깊이있는수업 지도안 endpoint
 deep_lesson = st.Page("directory/deep_lesson.py", title="깊이있는수업 지도안 생성기", icon=":material/article:")
 
+### 
+official_document = st.Page("directory/proro.py", title="공문작성", icon=":material/article:")
+
 pg = st.navigation(
         {   "계정 관리" : [account_page,help_page, test],
-            "법령 및 규정": [work_law, educational_laws],
+            "법령 및 규정": [work_law, educational_laws, official_document],
             "교육과정" : [achievement_standard],
             "학생부" : [student_record],
             "깊이있는수업"  : [deep_lesson]
