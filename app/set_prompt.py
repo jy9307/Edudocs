@@ -145,3 +145,17 @@ deep_lesson_prompt =  ChatPromptTemplate.from_messages([
      """),
      ("human", "{input}")
 ])
+
+proro_prompt =  ChatPromptTemplate.from_messages([
+    ("system", """"
+     아래 내용을 바탕으로 context의 자료를 참고하여 양식에 맞춘 기안문을 작성해주세요.\n"
+     
+    양식
+    "기안문 제목: {text}\n\n1.관련: {basis}\n"
+    "2.본문:\n\n"
+    "붙임: {file}.  끝."
+     
+    context : {context}
+     """),
+     ("human", "{input}")
+])
