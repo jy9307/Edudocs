@@ -30,6 +30,9 @@ educational_laws = st.Page("directory/laws/education_law.py", title="초중등 �
 ### 교육과정 관련 endpoint
 achievement_standard = st.Page("directory/curriculum/achievemet_standard.py", title="성취기준", icon=":material/school:")
 
+### 에듀테크 관련 endpoint
+edutech_lesson_plan = st.Page("directory/edutech_lesson_plan.py", title="에듀테크 지도안", icon=":material/school:")
+
 ### 학생부 작성 관련 endpoint
 student_record = st.Page("directory/records/student_record.py", title="학생부 기재요령", icon=":material/article:")
 
@@ -47,7 +50,8 @@ pg = st.navigation(
             "법령 및 규정": [work_law, educational_laws, official_document],
             "교육과정" : [achievement_standard],
             "학생부" : [student_record],
-            "깊이있는수업"  : [deep_lesson]
+            "깊이있는수업"  : [deep_lesson],
+            "에듀테크" : [edutech_lesson_plan]
                     }
     )
 

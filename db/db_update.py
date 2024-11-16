@@ -73,11 +73,11 @@ def milvus_upload(collection_name, docs, drop_old=True) :
 ####--------- Upload achievement_standard
 
 # splitter = RecursiveCharacterTextSplitter(
-#     chunk_size = 500,
+#     chunk_size = 1500,
 #     chunk_overlap = 200,
-#     keep_separator = True,
-#     separators=[r"\n초등학교"],  # 정규표현식 포함
-#     is_separator_regex=True,  # 정규표현식 사용 가능하도록 설정
+#     # keep_separator = True,
+#     # separators=[r"\n초등학교"],  # 정규표현식 포함
+#     # is_separator_regex=True,  # 정규표현식 사용 가능하도록 설정
 # )
 
 
@@ -92,7 +92,10 @@ def milvus_upload(collection_name, docs, drop_old=True) :
 #         loader.load_and_split(text_splitter=splitter)
 #     )  # 로더를 사용하여 문서를 로드하고 docs 리스트에 추가합니다.
 
-# add_as_metadata(docs)
+# for i in docs :
+#     print(i)
+
+# # add_as_metadata(docs)
 
 # milvus_upload("achievement_standard",docs)
 
@@ -140,27 +143,101 @@ def milvus_upload(collection_name, docs, drop_old=True) :
 # docs = docs_1+docs_2
 # milvus_upload("work_law",docs)
 
+###--------- Upload deep_lesson
+
+# loaders = [
+#     # 파일을 로드합니다.
+#     TextLoader("./깊이있는 수업 단원 설계 예시 자료.txt"),
+# ]
+
+# splitter = RecursiveCharacterTextSplitter(
+#     chunk_size = 400,
+#     chunk_overlap = 200,
+#     keep_separator = True,
+#     separators=[r"\n\(\d+\)"],  # 정규표현식 포함
+#     is_separator_regex=True,  # 정규표현식 사용 가능하도록 설정
+# )
+
+
+# docs = []  # 빈 리스트를 생성합니다.
+# for loader in loaders:  # loaders 리스트의 각 로더에 대해 반복합니다.
+#     docs.extend(
+#         loader.load_and_split(text_splitter=splitter)
+#     )  # 로더를 사용하여 문서를 로드하고 docs 리스트에 추가합니다.
+
+# # for i in docs :
+# #     print(i)
+
+# milvus_upload("deep_lesson",docs)
+
+####--------- Upload edutech
+
+# loaders = [
+#     TextLoader("./에듀테크 수업 설계안.txt")
+# ]
+
+# splitter = RecursiveCharacterTextSplitter(
+#     chunk_size = 500,
+#     chunk_overlap = 200,
+#     keep_separator = True,
+#     separators=[r"\n\(\d+\)"],  # 정규표현식 포함
+#     is_separator_regex=True,  # 정규표현식 사용 가능하도록 설정
+# )
+
+
+# docs =[]
+# for loader in loaders :
+#     docs.extend(
+#         loader.load_and_split(text_splitter=splitter)
+#     )
+
+# milvus_upload("edutech_lesson",docs)
+
+
+# loaders = [
+#     TextLoader("./에듀테크 종류.txt")
+# ]
+
+# splitter = RecursiveCharacterTextSplitter(
+#     chunk_size = 500,
+#     chunk_overlap = 200,
+#     keep_separator = True,
+#     separators=[r"\n\(\d+\)"],  # 정규표현식 포함
+#     is_separator_regex=True,  # 정규표현식 사용 가능하도록 설정
+# )
+
+
+# docs =[]
+# for loader in loaders :
+#     docs.extend(
+#         loader.load_and_split(text_splitter=splitter)
+#     )
+
+# milvus_upload("edutech_collection", docs)
+
+
+####--------- Upload official_document
 
 loaders = [
-    # 파일을 로드합니다.
-    PyPDFLoader("./깊이있는수업.pdf"),
+    TextLoader("./official_document.txt")
 ]
 
-docs = []  # 빈 리스트를 생성합니다.
-for loader in loaders:  # loaders 리스트의 각 로더에 대해 반복합니다.
+splitter = RecursiveCharacterTextSplitter(
+    chunk_size = 500,
+    chunk_overlap = 200,
+    keep_separator = True,
+    separators=[r"\n기안문"],  # 정규표현식 포함
+    is_separator_regex=True,  # 정규표현식 사용 가능하도록 설정
+)
+
+
+docs =[]
+for loader in loaders :
     docs.extend(
-        loader.load_and_split()
-    )  # 로더를 사용하여 문서를 로드하고 docs 리스트에 추가합니다.
+        loader.load_and_split(text_splitter=splitter)
+    )
 
-# for i in docs :
-#     print(i)
+for i in docs :
+    print(i)
 
-milvus_upload("deep_lesson",docs)
-
-
-
-
-
-
-
-
+milvus_upload("official_document", docs)
