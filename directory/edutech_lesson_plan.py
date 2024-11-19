@@ -5,6 +5,7 @@ from langchain_core.runnables import RunnablePassthrough
 from langchain_core.prompts import ChatPromptTemplate
 from app.set_documents import load_Document
 from app.set_prompt import el_prompt
+from app.set_page import BasicChatbotPageTemplate
 from langchain_openai import ChatOpenAI
 from dotenv import load_dotenv
 
@@ -35,6 +36,11 @@ edutech_lesson_prompt = ChatPromptTemplate.from_messages([
      examples : {examples} """),
     ("human", "{input}")
 ])
+
+
+page_template = BasicChatbotPageTemplate()
+
+
 
 st.title("에듀테크 지도안 작성기")
 message = st.chat_input("찾고싶은 내용을 입력하세요")

@@ -101,25 +101,55 @@ def milvus_upload(collection_name, docs, drop_old=True) :
 
 ####--------- Upload work_law
 
-# splitter = RecursiveCharacterTextSplitter(
-#     chunk_size = 500,
-#     chunk_overlap = 200,
-#     keep_separator = True,
-#     separators=[r"\n제"],  # 정규표현식 포함
-#     is_separator_regex=True,  # 정규표현식 사용 가능하도록 설정
-# )
+llm  = ChatOpenAI(
+    model="gpt-4o-mini",
+    temperature = 0
+)
+prompt = ChatPromptTemplate.from_messages([
+    (
+        "system",
+        """
+        Read a segment of documentation and generate a concise context for legal document.
+        The context should include What this segment is mainly about.
+        
+        """,
+    ),
+    ("human", "{input}"),
+])
+
+context_chain = prompt | llm | StrOutputParser()
+
+splitter = RecursiveCharacterTextSplitter(
+    chunk_size = 500,
+    chunk_overlap = 200,
+    keep_separator = True,
+    separators=[r"\n제"],  # 정규표현식 포함
+    is_separator_regex=True,  # 정규표현식 사용 가능하도록 설정
+)
 
 
-# loaders = [
-#     # 파일을 로드합니다.
-#     TextLoader("./복무규정.txt"),
-# ]
+loaders = [
+    # 파일을 로드합니다.
+    TextLoader("./복무규정.txt"),
+]
 
-# docs_1 = []  # 빈 리스트를 생성합니다.
-# for loader in loaders:  # loaders 리스트의 각 로더에 대해 반복합니다.
-#     docs_1.extend(
-#         loader.load_and_split(text_splitter=splitter)
-#     )  # 로더를 사용하여 문서를 로드하고 docs 리스트에 추가합니다.
+docs_1 = []  # 빈 리스트를 생성합니다.
+for loader in loaders:  # loaders 리스트의 각 로더에 대해 반복합니다.
+    docs_1.extend(
+        loader.load_and_split(text_splitter=splitter)
+    )  # 로더를 사용하여 문서를 로드하고 docs 리스트에 추가합니다.
+
+for i, d in enumerate(docs_1) :
+    
+    context = context_chain.invoke({"input" : d})
+    d.page_content = f"Context : {context} \n {d.page_content}"
+
+    print(d)
+
+print(docs_1)
+
+milvus_upload("work_law",docs_1)
+
 
 
 # add_metadata(docs_1, "link", "https://www.law.go.kr/%EB%B2%95%EB%A0%B9/%EA%B5%AD%EA%B0%80%EA%B3%B5%EB%AC%B4%EC%9B%90%20%EB%B3%B5%EB%AC%B4%EA%B7%9C%EC%A0%95")
@@ -218,26 +248,26 @@ def milvus_upload(collection_name, docs, drop_old=True) :
 
 ####--------- Upload official_document
 
-loaders = [
-    TextLoader("./official_document.txt")
-]
+# loaders = [
+#     TextLoader("./official_document.txt")
+# ]
 
-splitter = RecursiveCharacterTextSplitter(
-    chunk_size = 500,
-    chunk_overlap = 200,
-    keep_separator = True,
-    separators=[r"\n기안문"],  # 정규표현식 포함
-    is_separator_regex=True,  # 정규표현식 사용 가능하도록 설정
-)
+# splitter = RecursiveCharacterTextSplitter(
+#     chunk_size = 500,
+#     chunk_overlap = 200,
+#     keep_separator = True,
+#     separators=[r"\n기안문"],  # 정규표현식 포함
+#     is_separator_regex=True,  # 정규표현식 사용 가능하도록 설정
+# )
 
 
-docs =[]
-for loader in loaders :
-    docs.extend(
-        loader.load_and_split(text_splitter=splitter)
-    )
+# docs =[]
+# for loader in loaders :
+#     docs.extend(
+#         loader.load_and_split(text_splitter=splitter)
+#     )
 
-for i in docs :
-    print(i)
+# for i in docs :
+#     print(i)
 
-milvus_upload("official_document", docs)
+# milvus_upload("official_document", docs)

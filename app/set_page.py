@@ -153,8 +153,12 @@ class BasicInputBoxPageTemplate() :
             user_input = st.text_input(f"{n} 입력창", key= i)
             self.inputs.append(user_input)
 
-    def generate_button(self, prompt_name, button_name, variables : List[str], input = "Follow the prompt") :
+    def from_retrievers(self, prompt_name, button_name, variables : List[str], input = "Follow the prompt") :
     
+        """
+        Generate answers from the prompt constructed by multiple retrievers.
+        """
+
         docs = load_Document()
         retriever = docs.select_document(self.page_name).as_retriever()
         context = retriever.batch([f"{self.inputs[0]},{self.inputs[1]},{self.inputs[2]}"])

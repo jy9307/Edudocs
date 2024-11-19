@@ -19,19 +19,6 @@ if 'aac_messages' not in st.session_state:
 
 load_dotenv()
 
-class ChatCallbackHandler(BaseCallbackHandler):
-    message = ""
-
-    def on_llm_start(self, *args, **kwargs):
-        self.message_box = st.empty()
-
-    def on_llm_end(self, *args, **kwargs):
-        ms.save_message(self.message, "ai",'aac')
-
-    def on_llm_new_token(self, token, *args, **kwargs):
-        self.message += token
-        self.message_box.markdown(self.message)
-
 ms = MessageHandler()
 
 memory = ConversationBufferWindowMemory(

@@ -3,3 +3,4 @@ eduenv/
 env/
 .cache/
 __pycache__/
+practice.py

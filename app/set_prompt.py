@@ -148,14 +148,17 @@ deep_lesson_prompt =  ChatPromptTemplate.from_messages([
 
 proro_prompt =  ChatPromptTemplate.from_messages([
     ("system", """"
-     아래 내용을 바탕으로 context의 자료를 참고하여 양식에 맞춘 기안문을 작성해주세요.\n"
-     
-    양식
-    "기안문 제목: {text}\n\n1.관련: {basis}\n"
-    "2.본문:\n\n"
-    "붙임: {file}.  끝."
-     
-    context : {context}
+     너는 공무원의 공문 작성을 돕는 assistant야.
+     사용자가 제시하는 주제에 따른 공문을 작성할거야.
+     1. 주제에 따라 제목을 작성해줘. 이때, example의 예시에서 비슷한 것이 있으면 대부분 복사해와도 좋아.
+     2. '관련'과 '붙임을 참고해서 공문을 작성해줘.
+     3. example의 예시 양식에 따라 기안문을 작성해줘.\n"
+    
+    - 관련 : {basis}.
+    - 붙임 : {file}
+
+
+    example : {context}
      """),
-     ("human", "{input}")
+     ("human", """{input}""")
 ])

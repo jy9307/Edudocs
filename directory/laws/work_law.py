@@ -1,6 +1,7 @@
 from app.set_page import BasicChatbotPageTemplate, MessageHandler, ChatCallbackHandler
 from app.set_prompt import wl_prompt
 from langchain_openai import ChatOpenAI
+from app.set_documents import load_Document
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -30,6 +31,10 @@ ex) "휴직 종류 종류와 기간", "특별휴가 종류와 기간", "징계�
 **본 검색 결과는 참고용일 뿐이므로, 확실한 정보를 원하신다면 함께 제공되는 법률 조항과 원문 링크를 함께 확인하시기 바랍니다!**
 """
 
-page_template.set_chat_ui(wl_prompt,
+retriever = load_Document().select_document("work_law").as_retriever(search_type="mmr",search_kwargs={"k": 10})
+
+page_template.set_chat_ui_with_retriever(wl_prompt,
                           page_info,
+                          retriever
+
 )
