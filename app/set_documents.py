@@ -17,7 +17,7 @@ class load_Document() :
         self.vectorstore = Milvus(
             embedding_function=self.embedder,
             collection_name=page_name,
-            connection_args={"host": "3.38.106.139", "port": "19530"},
+            connection_args={"uri": "http://localhost:19530"},
             )
         
         return self.vectorstore

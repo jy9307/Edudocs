@@ -1,23 +1,81 @@
 import streamlit as st
+import requests
+import firebase_admin
+from firebase_admin import auth, credentials
 
+# Firebase Admin SDK 초기화
+if not firebase_admin._apps:
+    cred = credentials.Certificate("path/to/your-service-account.json")
+    firebase_admin.initialize_app(cred)
+
+# Firebase Web App Configuration (반영된 설정 사용)
+FIREBASE_CONFIG = {
+    "apiKey": "AIzaSyBG6tTmcHtpiUF4qF62nEkmfBnAuu8DtxA",
+    "authDomain": "edudocs-d6ba7.firebaseapp.com",
+    "clientId": "734856772791.apps.googleusercontent.com",  # 반드시 Firebase 콘솔에서 확인하세요.
+    "redirectUri": "http://localhost:8501",  # Streamlit 앱이 실행되는 URL
+}
+
+# Streamlit Session State 초기화
 if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
+    st.session_state.user_info = None
 
+
+# 로그인 함수
 def login():
-    if st.button("Log in"):
-        st.session_state.logged_in = True
-        st.rerun()
+    # Google OAuth Login URL 생성
+    auth_url = (
+        f"https://accounts.google.com/o/oauth2/v2/auth"
+        f"?response_type=code"
+        f"&client_id={FIREBASE_CONFIG['clientId']}"
+        f"&redirect_uri={FIREBASE_CONFIG['redirectUri']}"
+        f"&scope=email profile"
+    )
+    st.markdown(f"[Log in with Google]({auth_url})")
 
+    # OAuth Callback 처리
+    query_params = st.experimental_get_query_params()
+    if "code" in query_params:
+        auth_code = query_params["code"][0]
+
+        # Google Authorization Code를 Firebase ID Token으로 교환
+        token_endpoint = "https://oauth2.googleapis.com/token"
+        token_payload = {
+            "code": auth_code,
+            "client_id": FIREBASE_CONFIG["clientId"],
+            "client_secret": "YOUR_CLIENT_SECRET",  # Firebase 콘솔에서 클라이언트 비밀 키 확인
+            "redirect_uri": FIREBASE_CONFIG["redirectUri"],
+            "grant_type": "authorization_code",
+        }
+        token_response = requests.post(token_endpoint, data=token_payload)
+        token_data = token_response.json()
+
+        try:
+            id_token = token_data["id_token"]
+            decoded_token = auth.verify_id_token(id_token)
+            st.session_state.logged_in = True
+            st.session_state.user_info = decoded_token
+            st.experimental_set_query_params()  # Query Params 초기화
+            st.rerun()
+        except Exception as e:
+            st.error("Authentication failed. Please try again.")
+            st.error(str(e))
+
+
+# 로그아웃 함수
 def logout():
     if st.button("Log out"):
         st.session_state.logged_in = False
+        st.session_state.user_info = None
+        st.experimental_set_query_params()
         st.rerun()
 
 
-###계정 관련 endpoint
-if st.session_state.logged_in == False :
+# 페이지 정의
+if not st.session_state.logged_in:
     account_page = st.Page(login, title="Log in", icon=":material/login:")
-else :
+else:
     account_page = st.Page(logout, title="Log out", icon=":material/logout:")
 
 help_page = st.Page("directory/settings/help.py", title = "도움말", icon=":material/help:", default=True)
