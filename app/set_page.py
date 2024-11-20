@@ -87,7 +87,7 @@ class BasicChatbotPageTemplate() :
             self.mh.send_message(message, "human", self.page_name)
             chain = (
                 {
-                "context" : docs.select_document(self.page_name).as_retriever(search_type=search_type,
+                "context" : docs.Chroma_select_document(self.page_name).as_retriever(search_type=search_type,
                                                                 search_kwargs={'k':6}),
                 "input" : RunnablePassthrough()
                 }
@@ -156,7 +156,7 @@ class BasicInputBoxPageTemplate() :
     def generate_button(self, prompt_name, button_name, variables : List[str], input = "Follow the prompt") :
     
         docs = load_Document()
-        retriever = docs.select_document(self.page_name).as_retriever()
+        retriever = docs.Chroma_select_document(self.page_name).as_retriever()
         context = retriever.batch([f"{self.inputs[0]},{self.inputs[1]},{self.inputs[2]}"])
         variables =  {f"{variables[i]}": self.inputs[i] for i in range(len(self.inputs))}
         if st.button(button_name):
