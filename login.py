@@ -3,7 +3,9 @@ from streamlit_oauth import OAuth2Component
 import os
 import base64
 import json
+from dotenv import load_dotenv
 
+load_dotenv()
 
 # 페이지 기본 설정
 st.set_page_config(
@@ -76,7 +78,7 @@ if "auth" not in st.session_state:
     result = oauth2.authorize_button(
         name="Continue with Google",
         icon="https://www.google.com.tw/favicon.ico",
-        redirect_uri="http://localhost:8501",
+        redirect_uri="3.38.106.139:8501",
         scope="openid email profile",
         key="google",
         extras_params={"prompt": "consent", "access_type": "offline"},

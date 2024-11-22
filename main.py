@@ -6,22 +6,11 @@ import json
 import base64
 import os
 
-# Load environment variables from .env file
-from dotenv import load_dotenv
-load_dotenv()
-
-# 환경 변수에서 클라이언트 ID와 시크릿 가져오기
-CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID")
-CLIENT_SECRET = os.environ.get("GOOGLE_CLIENT_SECRET")
-AUTHORIZE_ENDPOINT = "https://accounts.google.com/o/oauth2/v2/auth"
-TOKEN_ENDPOINT = "https://oauth2.googleapis.com/token"
-REVOKE_ENDPOINT = "https://oauth2.googleapis.com/revoke"
 
 def logout() :
     del st.session_state["auth"]
     del st.session_state["token"]
     st.rerun()
-
 
 
 # 페이지 정의
@@ -46,9 +35,6 @@ edutech_lesson_plan = st.Page("directory/edutech_lesson_plan.py", title="에듀�
 ### 학생부 작성 관련 endpoint
 student_record = st.Page("directory/records/student_record.py", title="학생부 기재요령", icon=":material/article:")
 
-### test
-test = st.Page("directory/test.py", title="연습")
-
 ### 깊이있는수업 지도안 endpoint
 deep_lesson = st.Page("directory/deep_lesson.py", title="깊이있는수업 지도안 생성기", icon=":material/article:")
 
@@ -57,7 +43,7 @@ official_document = st.Page("directory/proro.py", title="공문작성", icon=":m
 
 pg = st.navigation(
     
-        {   "계정 관리" : [account_page,help_page, test],
+        {   "계정 관리" : [account_page,help_page],
             "법령 및 규정": [work_law, educational_laws, official_document],
             "교육과정" : [achievement_standard],
             "학생부" : [student_record],

@@ -22,8 +22,8 @@ splitter = RecursiveCharacterTextSplitter(
 
 loaders = [
     # 파일을 로드합니다.
-    TextLoader("교육공무원법.txt"),
-    TextLoader("복무규정.txt")
+    TextLoader("work_laws.txt"),
+    TextLoader("work_laws_for_educator.txt")
 ]
 
 docs = []  # 빈 리스트를 생성합니다.
