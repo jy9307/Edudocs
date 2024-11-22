@@ -1,5 +1,5 @@
 from app.set_page import BasicInputBoxPageTemplate, MessageHandler, ChatCallbackHandler
-from langchain_core.prompts import ChatPromptTemplate, FewShotChatMessagePromptTemplate
+from langchain_core.prompts import ChatPromptTemplate
 from app.set_prompt import deep_lesson_prompt
 from langchain_openai import ChatOpenAI
 from dotenv import load_dotenv
@@ -48,13 +48,6 @@ as_example_prompt = ChatPromptTemplate.from_messages(
     ]
 )
 
-as_few_shot_prompt = FewShotChatMessagePromptTemplate(
-    example_prompt=as_example_prompt,
-    examples=as_examples,
-)
-
-
-
 deep_lesson_prompt =  ChatPromptTemplate.from_messages([
     ("system", """"
      아래 내용을 바탕으로 context의 자료를참고하여 양식에 맞춘 지도안을 작성해주세요.\n"
@@ -65,7 +58,6 @@ deep_lesson_prompt =  ChatPromptTemplate.from_messages([
      
     context : {context}
      """),
-     as_few_shot_prompt
      ("human", "{input}")
 ])
 

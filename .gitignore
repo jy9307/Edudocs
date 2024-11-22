@@ -3,3 +3,5 @@ eduenv/
 env/
 .cache/
 __pycache__/
+firebase_key.json
+db/chroma_db
