@@ -105,3 +105,33 @@ DB_PATH = "./chroma_db"
 persist_db = Chroma.from_documents(
     docs, OpenAIEmbeddings(), persist_directory=DB_PATH, collection_name="achievement_standard"
 )
+
+#-------------------------------------------------------공문
+
+splitter = RecursiveCharacterTextSplitter(
+    chunk_size = 100,
+    chunk_overlap = 0,
+    keep_separator = True,
+    separators=["기안문"],  # 정규표현식 포함
+    is_separator_regex=True,  # 정규표현식 사용 가능하도록 설정
+)
+
+
+loaders = [
+    # 파일을 로드합니다.
+    TextLoader("./official_document.txt"),
+]
+
+docs = []  # 빈 리스트를 생성합니다.
+for loader in loaders:  # loaders 리스트의 각 로더에 대해 반복합니다.
+    docs.extend(
+        loader.load_and_split(text_splitter=splitter)
+    )
+     # 로더를 사용하여 문서를 로드하고 docs 리스트에 추가합니다.
+# 저장할 경로 지정
+DB_PATH = "./chroma_db"
+
+# 문서를 디스크에 저장합니다. 저장시 persist_directory에 저장할 경로를 지정합니다.
+persist_db = Chroma.from_documents(
+    docs, OpenAIEmbeddings(), persist_directory=DB_PATH, collection_name="official_document"
+)

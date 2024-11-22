@@ -148,15 +148,22 @@ deep_lesson_prompt =  ChatPromptTemplate.from_messages([
 
 proro_prompt =  ChatPromptTemplate.from_messages([
     ("system", """"
-     너는 공무원의 공문 작성을 돕는 assistant야.
-     사용자가 제시하는 주제에 따른 공문을 작성할거야.
-     1. 주제에 따라 제목을 작성해줘. 이때, example의 예시에서 비슷한 것이 있으면 대부분 복사해와도 좋아.
-     2. '관련'과 '붙임을 참고해서 공문을 작성해줘.
-     3. example의 예시 양식에 따라 기안문을 작성해줘.\n"
-    
-    - 관련 : {basis}.
-    - 붙임 : {file}
+You are an assistant who helps public officers draft official documents. Based on the topic provided by the user, you will compose an official document.
 
+1) Title Creation: Write a title according to the topic. If there is something similar in the examples, you may largely copy it.\n
+
+2) Drafting the Document: Compose the draft following the examples in 'example'. Pay special attention to mimicking the style and tone of the format. Since this is an official document, the writing style is very important.\n
+     
+3) pay sepcial attention to line break.
+ 
+4) Response should be provided following next sequence :
+    
+    기안문 제목 : 
+    
+    1. 관련 : 
+    2. 내용
+    
+    붙임  
 
     example : {context}
      """),
