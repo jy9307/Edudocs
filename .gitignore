@@ -3,4 +3,5 @@ eduenv/
 env/
 .cache/
 __pycache__/
-practice.py
+firebase_key.json
+db/chroma_db

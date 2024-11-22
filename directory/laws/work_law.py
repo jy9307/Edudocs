@@ -1,5 +1,6 @@
 from app.set_page import BasicChatbotPageTemplate, MessageHandler, ChatCallbackHandler
 from app.set_prompt import wl_prompt
+from app.set_documents import load_Document
 from langchain_openai import ChatOpenAI
 from app.set_documents import load_Document
 from dotenv import load_dotenv
