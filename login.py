@@ -1,12 +1,20 @@
 import streamlit as st
 from streamlit_oauth import OAuth2Component
-import os
-import base64
-import json
 from dotenv import load_dotenv
+import os, base64, json
 import firebase_admin
 from firebase_admin import credentials, auth, firestore
 import datetime
+from datetime import timezone
+import random
+import string
+
+# OAuth2 `state` 값 생성
+def generate_state():
+    return ''.join(random.choices(string.ascii_letters + string.digits, k=32))
+
+if "state" not in st.session_state:
+    st.session_state.state = generate_state()
 
 load_dotenv()
 
@@ -17,21 +25,6 @@ if not firebase_admin._apps:
 
 # Firestore 초기화
 db = firestore.client()
-
-
-# Firebase Admin SDK 초기화
-if not firebase_admin._apps:
-    cred = credentials.Certificate("firebase_key.json")  # 서비스 계정 키 파일 경로
-    firebase_admin.initialize_app(cred)
-
-# Firestore 초기화
-db = firestore.client()
-
-
-# Firebase Admin SDK 초기화
-if not firebase_admin._apps:
-    cred = credentials.Certificate("firebase_key.json")  # 서비스 계정 키 파일 경로
-    firebase_admin.initialize_app(cred)
 
 # 페이지 기본 설정
 st.set_page_config(
@@ -105,10 +98,11 @@ if "auth" not in st.session_state:
         name="Continue with Google",
         icon="https://www.google.com.tw/favicon.ico",
         redirect_uri="https://www.edudocs.site",
-        redirect_uri="https://www.edudocs.site",
         scope="openid email profile",
         key="google",
-        extras_params={"prompt": "consent", "access_type": "offline"},
+        extras_params={"state" : st.session_state.state,
+                       "prompt": "consent", 
+                       "access_type": "offline"},
         use_container_width=True,
         pkce='S256',
     )
@@ -148,10 +142,17 @@ if "auth" not in st.session_state:
                 "email": email,
                 "name": name,
                 "points": 0,
-                "last_login": datetime.utcnow(),
+                "last_login": datetime.now(timezone.utc),
             }
             user_ref.set(user_data)
             points = 0
+
+        returned_state = result.get("state")
+        if returned_state != st.session_state.state:
+            st.error("Invalid state value. Please try logging in again.")
+        else:
+            st.success("OAuth2 authentication successful!")
+
         st.rerun()
 else:
     if st.button("Logout"):
