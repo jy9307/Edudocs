@@ -4,8 +4,15 @@ import os
 import base64
 import json
 from dotenv import load_dotenv
+import firebase_admin
+from firebase_admin import credentials, auth
 
 load_dotenv()
+
+# Firebase Admin SDK 초기화
+if not firebase_admin._apps:
+    cred = credentials.Certificate("firebase_key.json")  # 서비스 계정 키 파일 경로
+    firebase_admin.initialize_app(cred)
 
 # 페이지 기본 설정
 st.set_page_config(
@@ -78,7 +85,7 @@ if "auth" not in st.session_state:
     result = oauth2.authorize_button(
         name="Continue with Google",
         icon="https://www.google.com.tw/favicon.ico",
-        redirect_uri="3.38.106.139:8501",
+        redirect_uri="https://www.edudocs.site",
         scope="openid email profile",
         key="google",
         extras_params={"prompt": "consent", "access_type": "offline"},
@@ -97,6 +104,14 @@ if "auth" not in st.session_state:
         email = payload["email"]
         st.session_state["auth"] = email
         st.session_state["token"] = result["token"]
+
+	#Firebase 사용자 생성 또는 조회
+        try:
+            firebase_user = auth.get_user_by_email(email)
+        except auth.UserNotFoundError:
+            firebase_user = auth.create_user(
+                email=email
+            )
         st.rerun()
 else:
     if st.button("Logout"):
