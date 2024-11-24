@@ -6,15 +6,6 @@ import firebase_admin
 from firebase_admin import credentials, auth, firestore
 import datetime
 from datetime import timezone
-import random
-import string
-
-# OAuth2 `state` 값 생성
-def generate_state():
-    return ''.join(random.choices(string.ascii_letters + string.digits, k=32))
-
-if "state" not in st.session_state:
-    st.session_state.state = generate_state()
 
 load_dotenv()
 
@@ -83,43 +74,49 @@ with st.form("login_form"):
 
 st.markdown('</div>', unsafe_allow_html=True)
 
-# create an OAuth2Component instance
+# OAuth2 설정
 CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID")
 CLIENT_SECRET = os.environ.get("GOOGLE_CLIENT_SECRET")
 AUTHORIZE_ENDPOINT = "https://accounts.google.com/o/oauth2/v2/auth"
 TOKEN_ENDPOINT = "https://oauth2.googleapis.com/token"
 REVOKE_ENDPOINT = "https://oauth2.googleapis.com/revoke"
 
-
 if "auth" not in st.session_state:
-    # create a button to start the OAuth2 flow
-    oauth2 = OAuth2Component(CLIENT_ID, CLIENT_SECRET, AUTHORIZE_ENDPOINT, TOKEN_ENDPOINT, TOKEN_ENDPOINT, REVOKE_ENDPOINT)
+    # OAuth2Component 인스턴스 생성
+    oauth2 = OAuth2Component(
+        client_id=CLIENT_ID,
+        client_secret=CLIENT_SECRET,
+        authorize_url=AUTHORIZE_ENDPOINT,
+        access_token_url=TOKEN_ENDPOINT,
+        refresh_token_url=TOKEN_ENDPOINT,
+        revoke_url=REVOKE_ENDPOINT
+    )
     result = oauth2.authorize_button(
         name="Continue with Google",
         icon="https://www.google.com.tw/favicon.ico",
         redirect_uri="https://www.edudocs.site",
         scope="openid email profile",
-        key="google",
-        extras_params={"state" : st.session_state.state,
-                       "prompt": "consent", 
-                       "access_type": "offline"},
+        key="google",  # 이 key 값이 state 저장에 사용됩니다.
+        extras_params={
+            # 여기서 'state' 제거
+            "prompt": "consent",
+            "access_type": "offline"
+        },
         use_container_width=True,
         pkce='S256',
     )
-    
+
     if result:
-        # decode the id_token jwt and get the user's email address
+        # id_token 디코딩하여 사용자 정보 가져오기
         id_token = result["token"]["id_token"]
-        # verify the signature is an optional step for security
         payload = id_token.split(".")[1]
-        # add padding to the payload if needed
-        payload += "=" * (-len(payload) % 4)
+        payload += "=" * (-len(payload) % 4)  # 패딩 추가
         user_info = json.loads(base64.b64decode(payload))
         email = user_info["email"]
         name = user_info.get("name", "Unknown User")
         picture = user_info.get("picture")
 
-        #Firebase 사용자 생성 또는 조회
+        # Firebase 사용자 생성 또는 조회
         try:
             firebase_user = auth.get_user_by_email(email)
         except auth.UserNotFoundError:
@@ -129,7 +126,7 @@ if "auth" not in st.session_state:
                 photo_url=picture,
             )
 
-                # Firestore에서 사용자 정보 가져오기 또는 초기화
+        # Firestore에서 사용자 정보 가져오기 또는 초기화
         user_ref = db.collection("users").document(firebase_user.uid)
         user_doc = user_ref.get()
 
@@ -142,19 +139,27 @@ if "auth" not in st.session_state:
                 "email": email,
                 "name": name,
                 "points": 0,
-                "last_login": datetime.now(timezone.utc),
+                "last_login": datetime.datetime.now(timezone.utc),
             }
             user_ref.set(user_data)
             points = 0
 
+        # 저장된 state 값 가져오기
+        stored_state = st.session_state.get(f'state-{oauth2.key}')
+
         returned_state = result.get("state")
-        if returned_state != st.session_state.state:
+        if returned_state != stored_state:
             st.error("Invalid state value. Please try logging in again.")
         else:
             st.success("OAuth2 authentication successful!")
+            # 인증 상태 저장
+            st.session_state["auth"] = True
+            st.session_state["token"] = result["token"]
 
-        st.rerun()
+        st.experimental_rerun()
 else:
+    st.success("이미 로그인 상태입니다.")
     if st.button("Logout"):
         del st.session_state["auth"]
         del st.session_state["token"]
+        st.experimental_rerun()

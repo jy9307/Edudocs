@@ -62,7 +62,7 @@ pg.run()
 
 with st.sidebar :
     if "auth" not in st.session_state:
-        st.markdown("오프라인 모드")
+        st.markdown("로그인해주세요!")
     else :
         email = st.session_state['auth']
         email = email.split("@")
