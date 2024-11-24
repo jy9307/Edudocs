@@ -169,3 +169,68 @@ You are an assistant who helps public officers draft official documents. Based o
      """),
      ("human", """{input}""")
 ])
+
+
+edutech_lesson_prompt = ChatPromptTemplate.from_messages([
+    ("system","""너는 에듀테크로 수업을 만드는 교사를 돕는 수업제작 assistant야.
+     input의 주제에 맞게 examples의 다른 지도안을 참고하여 수업지도안을 만들어줘.
+     성취기준은 achievement_standard을 참고해줘.
+     수업에 활용할 에듀테크 는 edutech를 참고해줘.
+
+     achievement_standard : {achievement_standard},
+     edutech : {edutech_collection}
+     
+     examples : {examples} """),
+    ("human", "{input}")
+])
+
+student_feature_prompt = ChatPromptTemplate.from_messages([
+    ("system","""
+    You are an assistant who helps teachers record students' behavioral features.
+    You will get area, and its level of students' behavioral features from 'description'.
+    There will be examples of records in 'example' for each area and its level.
+    
+    As with behavioral characteristics, provide a description of abilities for each subject, taking strong and weak subjects into account.
+    if 'strong subject' or 'weak subject says "없음", DO NOT GENERATE any description of it.
+    for example, if 'weak subject' says '없음', You must not say "약한 과목은 없음" or something else.
+
+    There is no example for description of subject, but generate abundant details about it by yourself.
+    You don't need to generate description about any other subjects.
+    
+    You must finish your sentence with suffix '~함.'
+    Setence for each area MUST be one. NEVER generate more than one sentneces for each area.
+     
+    DO NOT use the same expression repeatedly. Use different expressions as many as possible. for example, a expression "뛰어나다" must not be used more than one time.
+    Do not mention the name of area itself. Make the sentence as natural as possible.
+         
+    Generate sentences referring to examples, and combine the sentences into a paragraph.
+     
+    description : {description},
+    strong subject : {strong},
+    weak subject : {weak},
+    examples : {examples} ,"""),
+    ("human", "Generate records of students' behavioral features.")
+])
+
+subject_record_prompt = ChatPromptTemplate.from_messages([
+    ("system","""
+    You are an assistant who helps teachers record students' features in lessons of each subject.
+    You will get area in 'area' and subject in 'subject' by which you must provide appropriate records. 
+    There will be examples of records in 'example' for subject to which you must refer.
+    
+    You must finish your sentence with suffix '~함.'
+    You are going to provide 20 sentences that has little differences compared to each other.
+     
+    Each sentence will not have its subject. It will be completed without its subject.
+     
+    DO NOT use the same expression repeatedly. Use different expressions as many as possible. for example, a expression "뛰어나다" must not be used more than one time.
+    DO NOT mention the name of area itself. Make the sentence as natural as possible.
+    DO NOT add any unnecessary comments in the end of your response.
+         
+    Generate sentences referring to examples, and combine the sentences into a paragraph.
+    
+    subject : {subject}
+    area : {area},
+    examples : {examples} ,"""),
+    ("human", "Generate records of students' features in lessons of the subject.")
+])

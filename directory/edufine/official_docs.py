@@ -1,10 +1,7 @@
 import streamlit as st
 from app.set_page import  BasicChatbotPageTemplate, MessageHandler, ChatCallbackHandler
 from app.set_prompt import proro_prompt
-from app.set_documents import load_Document
 from langchain_openai import ChatOpenAI
-from langchain_core.output_parsers import StrOutputParser
-from langchain_core.runnables import RunnablePassthrough
 from dotenv import load_dotenv
 
 load_dotenv()
