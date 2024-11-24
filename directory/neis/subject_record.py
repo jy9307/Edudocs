@@ -17,6 +17,13 @@ llm = ChatOpenAI(
 
 docs = load_Document().Chroma_select_document("subject_record")
 
+
+st.set_page_config(
+    page_title="과목 누가기록 생성기",
+    page_icon="📄",
+    layout="wide"
+)
+
 st.title("과목 누가기록 생성기")
 
 # 설명

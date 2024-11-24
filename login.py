@@ -4,8 +4,20 @@ import os
 import base64
 import json
 from dotenv import load_dotenv
+import firebase_admin
+from firebase_admin import credentials, auth, firestore
+import datetime
 
 load_dotenv()
+
+# Firebase Admin SDK 초기화
+if not firebase_admin._apps:
+    cred = credentials.Certificate("firebase_key.json")  # 서비스 계정 키 파일 경로
+    firebase_admin.initialize_app(cred)
+
+# Firestore 초기화
+db = firestore.client()
+
 
 # 페이지 기본 설정
 st.set_page_config(
@@ -78,7 +90,7 @@ if "auth" not in st.session_state:
     result = oauth2.authorize_button(
         name="Continue with Google",
         icon="https://www.google.com.tw/favicon.ico",
-        redirect_uri="3.38.106.139:8501",
+        redirect_uri="https://www.edudocs.site",
         scope="openid email profile",
         key="google",
         extras_params={"prompt": "consent", "access_type": "offline"},
@@ -93,10 +105,38 @@ if "auth" not in st.session_state:
         payload = id_token.split(".")[1]
         # add padding to the payload if needed
         payload += "=" * (-len(payload) % 4)
-        payload = json.loads(base64.b64decode(payload))
-        email = payload["email"]
-        st.session_state["auth"] = email
-        st.session_state["token"] = result["token"]
+        user_info = json.loads(base64.b64decode(payload))
+        email = user_info["email"]
+        name = user_info.get("name", "Unknown User")
+        picture = user_info.get("picture")
+
+        #Firebase 사용자 생성 또는 조회
+        try:
+            firebase_user = auth.get_user_by_email(email)
+        except auth.UserNotFoundError:
+            firebase_user = auth.create_user(
+                email=email,
+                display_name=name,
+                photo_url=picture,
+            )
+
+                # Firestore에서 사용자 정보 가져오기 또는 초기화
+        user_ref = db.collection("users").document(firebase_user.uid)
+        user_doc = user_ref.get()
+
+        if user_doc.exists:
+            user_data = user_doc.to_dict()
+            points = user_data.get("points", 0)
+        else:
+            # 사용자 초기 데이터 생성
+            user_data = {
+                "email": email,
+                "name": name,
+                "points": 0,
+                "last_login": datetime.utcnow(),
+            }
+            user_ref.set(user_data)
+            points = 0
         st.rerun()
 else:
     if st.button("Logout"):

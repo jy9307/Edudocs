@@ -17,6 +17,12 @@ llm = ChatOpenAI(
 
 docs = load_Document().Chroma_select_document("student_feature")
 
+st.set_page_config(
+    page_title="행발 생성기",
+    page_icon="📄",
+    layout="wide"
+)
+
 st.title("행발 생성기")
 
 # 설명
