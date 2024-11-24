@@ -6,23 +6,9 @@ import json
 from dotenv import load_dotenv
 import firebase_admin
 from firebase_admin import credentials, auth, firestore
-import datetime
+from datetime import datetime, timezone
 
 load_dotenv()
-
-# Firebase Admin SDK 초기화
-if not firebase_admin._apps:
-    cred = credentials.Certificate("firebase_key.json")  # 서비스 계정 키 파일 경로
-    firebase_admin.initialize_app(cred)
-
-# Firestore 초기화
-db = firestore.client()
-
-
-# Firebase Admin SDK 초기화
-if not firebase_admin._apps:
-    cred = credentials.Certificate("firebase_key.json")  # 서비스 계정 키 파일 경로
-    firebase_admin.initialize_app(cred)
 
 # Firestore 초기화
 db = firestore.client()
@@ -105,7 +91,6 @@ if "auth" not in st.session_state:
         name="Continue with Google",
         icon="https://www.google.com.tw/favicon.ico",
         redirect_uri="https://www.edudocs.site",
-        redirect_uri="https://www.edudocs.site",
         scope="openid email profile",
         key="google",
         extras_params={"prompt": "consent", "access_type": "offline"},
@@ -148,7 +133,7 @@ if "auth" not in st.session_state:
                 "email": email,
                 "name": name,
                 "points": 0,
-                "last_login": datetime.utcnow(),
+                "last_login": datetime.now(timezone.utc()),
             }
             user_ref.set(user_data)
             points = 0
