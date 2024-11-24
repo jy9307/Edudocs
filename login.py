@@ -19,6 +19,20 @@ if not firebase_admin._apps:
 db = firestore.client()
 
 
+# Firebase Admin SDK 초기화
+if not firebase_admin._apps:
+    cred = credentials.Certificate("firebase_key.json")  # 서비스 계정 키 파일 경로
+    firebase_admin.initialize_app(cred)
+
+# Firestore 초기화
+db = firestore.client()
+
+
+# Firebase Admin SDK 초기화
+if not firebase_admin._apps:
+    cred = credentials.Certificate("firebase_key.json")  # 서비스 계정 키 파일 경로
+    firebase_admin.initialize_app(cred)
+
 # 페이지 기본 설정
 st.set_page_config(
     page_title="로그인 페이지",
@@ -90,6 +104,7 @@ if "auth" not in st.session_state:
     result = oauth2.authorize_button(
         name="Continue with Google",
         icon="https://www.google.com.tw/favicon.ico",
+        redirect_uri="https://www.edudocs.site",
         redirect_uri="https://www.edudocs.site",
         scope="openid email profile",
         key="google",

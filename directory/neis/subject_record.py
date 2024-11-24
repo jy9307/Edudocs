@@ -41,7 +41,7 @@ selection = st.pills("", options)
 if selection:
     st.markdown("##### 2. 과목의 어떤 영역 또는 활동에 대한 누가기록을 원하시나요? ")
 
-    area = st.text_input("")
+    area = st.text_input("원하는 결과가 나오지 않을 경우, 구체적으로 내용을 적을수록 더 정확한 결과를 얻을 수 있습니다.")
 
 
     if st.button("누가기록 생성!"):
