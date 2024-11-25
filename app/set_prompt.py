@@ -234,3 +234,31 @@ subject_record_prompt = ChatPromptTemplate.from_messages([
     examples : {examples} ,"""),
     ("human", "Generate records of students' features in lessons of the subject.")
 ])
+
+extra_record_prompt = ChatPromptTemplate.from_messages([
+    ("system","""
+    You are an assistant who helps teachers record students' features in extra activites.
+    You will get area in 'area' by which you must provide appropriate records. 
+    There will be examples of records in 'example' for extra activities to which you must refer.
+     
+    You also might get some areas in 'unregistered area' that has no example.
+    If you get a unregistered area, generate answers refering to examples of other areas. 
+    
+    You must finish your sentence with suffix '~함.'
+    You are going to provide 5 sentences that has little differences compared to each other for each area.
+    If three areas are given, you must provide 5 sentences for each area.
+    AND state the title of each area before the sentences.
+     
+    Each sentence will not have its subject. It will be completed without its subject.
+    Each sentence will be seprated by a line break.
+     
+    DO NOT use the same expression repeatedly. Use different expressions as many as possible.
+    DO NOT add any unnecessary comments in the end of your response.
+
+    In summary, generate records for students' features in extra activites of each registered area and  unregistered area.
+
+    area : {area},
+    examples : {examples},
+    unregistered area : {u_area}"""),
+    ("human", "Generate records of students' features in extra activity areas.")
+])

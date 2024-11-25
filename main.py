@@ -34,6 +34,7 @@ educational_laws = st.Page("directory/laws/education_law.py", title="초중등 �
 achievement_standard = st.Page("directory/curriculum/achievemet_standard.py", title="성취기준", icon=":material/school:")
 
 ### 나이스
+extra_record = st.Page("directory/neis/extra_record.py", title="창체 누가기록 생성기", icon=":material/article:")
 student_record = st.Page("directory/neis/student_record.py", title="학생부 기재요령", icon=":material/article:")
 student_feature = st.Page("directory/neis/student_feature.py", title="행발 생성기", icon=":material/article:")
 subject_record = st.Page("directory/neis/subject_record.py", title="과목 누가기록 생성기", icon=":material/article:")
@@ -51,7 +52,7 @@ pg = st.navigation(
         {   "계정 관리" : [account_page,help_page],
             "법령 및 규정": [work_law, educational_laws],
             "교육과정" : [achievement_standard],
-            "나이스" : [student_record, student_feature,subject_record],
+            "나이스" : [student_record, student_feature,subject_record, extra_record],
             "에듀파인" : [official_document],
             "수업"  : [deep_lesson, edutech_lesson]
                     }
