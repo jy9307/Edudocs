@@ -67,6 +67,7 @@ with st.sidebar :
         email = st.session_state['auth']
         email = email.split("@")
         st.markdown(f"{email[0]}님 환영합니다")
+        st.markdown(f"마지막 로그인 : {st.session_state['last_login']}")
         # if st.session_state["auth"] != None :
         #     st.markdown(f"{st.session_state['auth']}님 환영합니다!")
         # else :

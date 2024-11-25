@@ -8,13 +8,12 @@ from datetime import datetime, timezone
 
 load_dotenv()
 
-# Firestore 초기화
-db = firestore.client()
-
 # Firebase Admin SDK 초기화
 if not firebase_admin._apps:
     cred = credentials.Certificate("firebase_key.json")  # 서비스 계정 키 파일 경로
     firebase_admin.initialize_app(cred)
+
+db = firestore.client()
 
 # 페이지 기본 설정
 st.set_page_config(
@@ -94,7 +93,7 @@ if "auth" not in st.session_state:
         pkce='S256',
     )
 
-     if result:
+    if result:
         # decode the id_token jwt and get the user's email address
         id_token = result["token"]["id_token"]
         # verify the signature is an optional step for security
@@ -115,7 +114,6 @@ if "auth" not in st.session_state:
                 display_name=name,
                 photo_url=picture,
             )
-        print("정보가져오기 전")
 
         # Firestore에서 사용자 정보 가져오기 또는 초기화
         user_ref = db.collection("users").document(firebase_user.uid)
@@ -137,6 +135,10 @@ if "auth" not in st.session_state:
             user_ref.set(user_data)
             points = 0
 
+        st.session_state["auth"] = email
+        st.session_state["token"] = result["token"]
+        st.session_state["point"] = user_data['points']
+        st.session_state["last_login"] = user_data['last_login']
         print("rerun전")
         st.rerun()
 else:
