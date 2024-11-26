@@ -8,7 +8,7 @@ from langchain_core.output_parsers import StrOutputParser
 mh = MessageHandler()
 
 llm = ChatOpenAI(
-    temperature=0.5,
+    temperature=0.9,
     model='gpt-4o-mini',
     streaming= True,
     callbacks=[

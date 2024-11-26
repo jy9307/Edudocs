@@ -197,6 +197,8 @@ student_feature_prompt = ChatPromptTemplate.from_messages([
     There is no example for description of subject, but generate abundant details about it by yourself.
     You don't need to generate description about any other subjects.
     
+    Use the example as a reference, but try to use more elaborate expressions.
+    Do not use the exact same expression repetedly.
     You must finish your sentence with suffix '~함.'
     Setence for each area MUST be one. NEVER generate more than one sentneces for each area.
      
@@ -204,7 +206,14 @@ student_feature_prompt = ChatPromptTemplate.from_messages([
     Do not mention the name of area itself. Make the sentence as natural as possible.
          
     Generate sentences referring to examples, and combine the sentences into a paragraph.
-     
+    
+
+    And generate other three sentneces on which students'behavioral features are based on.
+    These sentences will be finish with suffix '~하였음'.
+    These new three sentences must be distinguished by a line break and very specific with detailed situation. For example, if you want to write about the behavior in the middle of lesson, the sentence should include which lesson, activity, part or area it was.
+    These new three sentences should be seperated from the established paragraph.
+    There will be the title '#### 행발 누가기록' before the new sentences.
+
     description : {description},
     strong subject : {strong},
     weak subject : {weak},
@@ -228,7 +237,7 @@ subject_record_prompt = ChatPromptTemplate.from_messages([
     DO NOT add any unnecessary comments in the end of your response.
          
     Generate sentences referring to examples, and combine the sentences into a paragraph.
-    
+
     subject : {subject}
     area : {area},
     examples : {examples} ,"""),
