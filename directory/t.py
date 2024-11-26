@@ -7,7 +7,7 @@ from langchain_core.output_parsers import StrOutputParser
 if "text" not in st.session_state:
     st.session_state.text = ""  # 현재 텍스트 상태
 if "prev_text" not in st.session_state:
-    st.session_state.prev_text = ""  # 이전 텍스트 상태
+    st.session_state.prev_text = ""  # 이전 텍스트 상태 (되돌리기용)
 
 # 텍스트 입력/결과 창 (하나의 창에서 입력과 결과를 관리)
 st.session_state.text = st.text_area(
@@ -18,7 +18,7 @@ st.session_state.text = st.text_area(
 
 # "문장 이어서 쓰기" 버튼 동작
 if st.button("문장 이어서 쓰기"):
-    # 현재 텍스트 상태를 이전 상태로 저장
+    # 현재 텍스트 상태를 이전 상태로 저장 (되돌리기용)
     st.session_state.prev_text = st.session_state.text
 
     generate_prompt = ChatPromptTemplate.from_messages([
@@ -33,20 +33,19 @@ if st.button("문장 이어서 쓰기"):
 
     chain = (generate_prompt | llm | StrOutputParser())
 
-    # 텍스트 이어쓰기 처리
+    # 현재 텍스트를 입력으로 사용해 이어쓰기 처리
     result = chain.invoke({
-        "input": st.session_state.text
+        "input": st.session_state.text  # 수정된 텍스트를 반영
     })
 
     # 기존 텍스트에 이어서 추가
-    st.session_state.text = f"{st.session_state.text}\n\n{result}"
+    st.session_state.text = f"{st.session_state.text},{result}"
     st.success("문장이 추가되었습니다!")
 
 # "직전 문장으로 돌아가기" 버튼 동작
 if st.button("직전 문장으로 돌아가기"):
     if st.session_state.prev_text:
         st.session_state.text = st.session_state.prev_text  # 이전 텍스트 상태로 복원
-        st.session_state.prev_text = ""  # 복원 후 이전 상태를 초기화
         st.success("직전 상태로 되돌아갔습니다!")
     else:
         st.warning("복구할 이전 상태가 없습니다!")
