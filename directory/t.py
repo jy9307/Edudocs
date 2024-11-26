@@ -39,14 +39,15 @@ if st.button("문장 이어서 쓰기"):
     })
 
     # 기존 텍스트에 이어서 추가
-    st.session_state.text = f"{st.session_state.text},{result}"
-    st.success("문장이 추가되었습니다!")
+    st.session_state.text += f"\n\n{result}"  # += 연산으로 상태를 즉시 업데이트
+    st.experimental_rerun()  # UI를 즉시 업데이트
 
 # "직전 문장으로 돌아가기" 버튼 동작
 if st.button("직전 문장으로 돌아가기"):
     if st.session_state.prev_text:
         st.session_state.text = st.session_state.prev_text  # 이전 텍스트 상태로 복원
-        st.success("직전 상태로 되돌아갔습니다!")
+        st.session_state.prev_text = ""  # 복원 후 이전 상태 초기화
+        st.experimental_rerun()  # UI를 즉시 업데이트
     else:
         st.warning("복구할 이전 상태가 없습니다!")
 
