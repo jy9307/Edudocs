@@ -4,16 +4,23 @@ from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import StrOutputParser
 
 # 초기 세션 상태 설정
-if "original_text" not in st.session_state:
-    st.session_state.original_text = ""
-if "generated_text" not in st.session_state:
-    st.session_state.generated_text = ""
+if "text" not in st.session_state:
+    st.session_state.text = ""  # 현재 텍스트 상태
+if "prev_text" not in st.session_state:
+    st.session_state.prev_text = ""  # 이전 텍스트 상태
 
-# 텍스트 입력 받기
-text = st.text_input("여기에 텍스트를 입력하세요", value=st.session_state.original_text)
+# 텍스트 입력/결과 창 (하나의 창에서 입력과 결과를 관리)
+st.session_state.text = st.text_area(
+    "여기에 텍스트를 입력하세요",
+    value=st.session_state.text,
+    height=200
+)
 
 # "문장 이어서 쓰기" 버튼 동작
 if st.button("문장 이어서 쓰기"):
+    # 현재 텍스트 상태를 이전 상태로 저장
+    st.session_state.prev_text = st.session_state.text
+
     generate_prompt = ChatPromptTemplate.from_messages([
         ("system", """지금까지 작성된 글을 읽고, 글의 내용을 자연스럽게 이어서 한 문장을 작성해봐."""),
         ("human", "{input}")
@@ -26,27 +33,28 @@ if st.button("문장 이어서 쓰기"):
 
     chain = (generate_prompt | llm | StrOutputParser())
 
-    # 원본과 이어서 쓰기 결과를 누적하여 처리
+    # 텍스트 이어쓰기 처리
     result = chain.invoke({
-        "input": st.session_state.generated_text if st.session_state.generated_text else text
+        "input": st.session_state.text
     })
 
-    # 결과를 세션 상태에 누적 저장
-    st.session_state.generated_text = f"{st.session_state.generated_text}\n\n{result}" if st.session_state.generated_text else result
+    # 기존 텍스트에 이어서 추가
+    st.session_state.text = f"{st.session_state.text}\n\n{result}"
     st.success("문장이 추가되었습니다!")
 
 # "직전 문장으로 돌아가기" 버튼 동작
 if st.button("직전 문장으로 돌아가기"):
-    st.session_state.generated_text = st.session_state.original_text  # 원래 텍스트로 복원
-    st.success("직전 상태로 되돌아갔습니다!")
-
-# 결과 출력
-st.text_area("결과", value=st.session_state.generated_text, height=200)
+    if st.session_state.prev_text:
+        st.session_state.text = st.session_state.prev_text  # 이전 텍스트 상태로 복원
+        st.session_state.prev_text = ""  # 복원 후 이전 상태를 초기화
+        st.success("직전 상태로 되돌아갔습니다!")
+    else:
+        st.warning("복구할 이전 상태가 없습니다!")
 
 # "복사하기" 버튼 동작
 if st.button("복사하기"):
-    # Streamlit에서는 브라우저 클립보드 직접 접근이 어려워 사용자가 텍스트를 복사하도록 알림 표시
-    st.text_area("복사할 텍스트", value=st.session_state.generated_text, height=200)
+    # 복사할 텍스트를 표시 (Streamlit에서는 클립보드 접근이 제한됨)
+    st.text_area("복사할 텍스트", value=st.session_state.text, height=200)
     st.success("완성된 텍스트가 복사 영역에 표시되었습니다. 복사하려면 Ctrl+C를 사용하세요.")
 
 # "글쓰기 모음집" 버튼 동작
