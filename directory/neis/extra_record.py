@@ -38,7 +38,7 @@ with tab1 :
 
         # 옵션 리스트
         options = [
-            '여름 개학식', '학급 규칙 세우기', '여름방학 돌아보기', '사이버폭력 예방교육', '학급임원선거', '성폭력예방교육', '교통안전교육', '약물 및 사이버중독 예방교육', '직업 안전교육', '실종유괴 예방교육', '학급회의', '언어폭력예방주간활동', '찾아가는 에너지교실', '소방훈련', '학교폭력 예방교육', '재난안전교육'
+            '여름 개학식', '학급 규칙 세우기', '여름방학 돌아보기', '사이버폭력 예방교육', '학급임원선거', '성폭력예방교육', '교통안전교육', '약물 및 사이버중독 예방교육', '직업 안전교육', '실종유괴 예방교육', '학급회의', '언어폭력예방주간활동', '찾아가는 에너지교실', '소방훈련', '학교폭력 예방교육', '재난안전교육', '생존수영교육', '장애이해교육'
         ]
 
         # 사용자가 선택한 옵션 저장
@@ -118,4 +118,30 @@ with tab2 :
 
 
 with tab3 :
-    st.write("개발 중")
+    st.write("누가기록을 만들고 싶은 진로활동의 이름을 모두 적어주세요.")
+
+    with st.container(border=True) :
+        activities = st.text_input("""ex) 워크넷검사, mbti검사, 잡월드체험 """, "")
+
+    if st.button("누가기록 생성!", key="진로"):
+        if activities != "" :
+
+            examples = []
+            examples.append(docs.get(where={"종류" : "진로"})['documents'][0])
+            area = ', '.join(selections)
+
+            st.markdown("### 생성된 누가기록 : ")
+            chain = (
+            extra_record_prompt
+            | llm
+            | StrOutputParser()
+            )
+
+
+            with st.container(border=True) :
+                chain.invoke({
+                "activities" : activities,
+                "examples" : examples,
+            })
+        else :
+            st.warning("활동을 먼저 적어주세요.")

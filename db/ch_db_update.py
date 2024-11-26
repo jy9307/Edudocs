@@ -230,7 +230,6 @@ for d in docs:
     lines = d.page_content.splitlines()
     d.metadata['영역'] = lines[1].split(":")[1].strip()
     d.metadata['수준'] = lines[2].split(":")[1].strip()
-    print(d)
 
 persist_db = Chroma.from_documents(
     docs, OpenAIEmbeddings(), persist_directory=DB_PATH, collection_name="student_feature"
@@ -260,7 +259,6 @@ for loader in loaders :
 for d in docs:
     lines = d.page_content.splitlines()
     d.metadata['과목'] = lines[0].split(" ")[1]
-    print(d)
 
 persist_db = Chroma.from_documents(
     docs, OpenAIEmbeddings(), persist_directory=DB_PATH, collection_name="subject_record"
@@ -271,6 +269,7 @@ persist_db = Chroma.from_documents(
 loaders = [
     TextLoader("창체(자율)누가기록.txt"),
     TextLoader("동아리(자율)누가기록.txt"),
+    TextLoader("진로(자율)누가기록.txt")
 ]
 
 splitter = RecursiveCharacterTextSplitter(
@@ -294,8 +293,11 @@ for d in docs:
     if d.metadata['source'] == '동아리(자율)누가기록.txt' :
         d.metadata['종류'] = '동아리'
 
-    else : 
+    elif d.metadata['source'] == '창체(자율)누가기록.txt' : 
         d.metadata['종류'] = '자율'
+
+    else :
+        d.metadata['종류'] = '진로'
 
 persist_db = Chroma.from_documents(
     docs, OpenAIEmbeddings(), persist_directory=DB_PATH, collection_name="extra_record"
