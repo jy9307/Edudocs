@@ -10,11 +10,15 @@ if "prev_text" not in st.session_state:
     st.session_state.prev_text = ""  # 이전 텍스트 상태 (되돌리기용)
 
 # 텍스트 입력/결과 창 (하나의 창에서 입력과 결과를 관리)
-st.session_state.text = st.text_area(
+new_text = st.text_area(
     "여기에 텍스트를 입력하세요",
     value=st.session_state.text,
     height=200
 )
+
+# 텍스트가 수정된 경우 세션 상태 업데이트
+if new_text != st.session_state.text:
+    st.session_state.text = new_text
 
 # "문장 이어서 쓰기" 버튼 동작
 if st.button("문장 이어서 쓰기"):
@@ -35,21 +39,24 @@ if st.button("문장 이어서 쓰기"):
 
     # 현재 텍스트를 입력으로 사용해 이어쓰기 처리
     result = chain.invoke({
-        "input": st.session_state.text  # 수정된 텍스트를 반영
+        "input": st.session_state.text
     })
 
     # 기존 텍스트에 이어서 추가
-    st.session_state.text += f"\n\n{result}"  # += 연산으로 상태를 즉시 업데이트
-    st.experimental_rerun()  # UI를 즉시 업데이트
+    st.session_state.text += f"\n\n{result}"
+    st.rerun()  # UI를 즉시 업데이트
 
 # "직전 문장으로 돌아가기" 버튼 동작
 if st.button("직전 문장으로 돌아가기"):
     if st.session_state.prev_text:
         st.session_state.text = st.session_state.prev_text  # 이전 텍스트 상태로 복원
         st.session_state.prev_text = ""  # 복원 후 이전 상태 초기화
-        st.experimental_rerun()  # UI를 즉시 업데이트
+        st.rerun()  # UI를 즉시 업데이트
     else:
         st.warning("복구할 이전 상태가 없습니다!")
+
+# 텍스트 출력 (세션 상태에 반영된 텍스트를 업데이트)
+st.text_area("결과", value=st.session_state.text, height=200)
 
 # "복사하기" 버튼 동작
 if st.button("복사하기"):
