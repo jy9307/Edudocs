@@ -13,10 +13,9 @@ if "generated_text" not in st.session_state:
 text = st.text_input("여기에 텍스트를 입력하세요", value=st.session_state.original_text)
 
 # "문장 이어서 쓰기" 버튼 동작
-if st.button("문장 이어서 쓰기") :
-    generate_prompt =  ChatPromptTemplate.from_messages([
-        ("system","""지금까지 작성된 글을 읽고, 글의 내용을 자연스럽게 이어서 한 문장을 작성해봐.
-        """),
+if st.button("문장 이어서 쓰기"):
+    generate_prompt = ChatPromptTemplate.from_messages([
+        ("system", """지금까지 작성된 글을 읽고, 글의 내용을 자연스럽게 이어서 한 문장을 작성해봐."""),
         ("human", "{input}")
     ])
 
@@ -25,14 +24,15 @@ if st.button("문장 이어서 쓰기") :
         model='gpt-4o-mini'
     )
 
-    chain = (generate_prompt|llm|StrOutputParser())
+    chain = (generate_prompt | llm | StrOutputParser())
 
+    # 원본과 이어서 쓰기 결과를 누적하여 처리
     result = chain.invoke({
-        "input" : text        
+        "input": st.session_state.generated_text if st.session_state.generated_text else text
     })
 
-    # 결과를 세션 상태에 저장
-    st.session_state.generated_text = result
+    # 결과를 세션 상태에 누적 저장
+    st.session_state.generated_text = f"{st.session_state.generated_text}\n\n{result}" if st.session_state.generated_text else result
     st.success("문장이 추가되었습니다!")
 
 # "직전 문장으로 돌아가기" 버튼 동작
