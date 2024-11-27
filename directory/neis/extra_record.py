@@ -1,7 +1,7 @@
 import streamlit as st
 from app.set_page import  MessageHandler, ChatCallbackHandler
 from app.set_documents import load_Document
-from app.set_prompt import extra_record_prompt
+from app.set_prompt import extra_record_prompt, career_prompt
 from langchain_openai import ChatOpenAI
 from langchain_core.output_parsers import StrOutputParser
 
@@ -29,6 +29,7 @@ st.set_page_config(
 st.title("과목 누가기록 생성기😆")
 
 tab1, tab2, tab3 = st.tabs(["자율", "동아리", "진로"])
+
 with tab1 :
     st.write("선택한 활동별로 각각 5개의 누가기록 예시가 생성됩니다.")
 
@@ -71,7 +72,6 @@ with tab1 :
             })
         else :
             st.warning("과목과 세부 영역(활동)을 먼저 선택해주세요.")
-
 
 with tab2 :
     st.write("선택한 동아리별로 각각 5개의 누가기록 예시가 생성됩니다.")
@@ -116,7 +116,6 @@ with tab2 :
         else :
             st.warning("과목과 세부 영역(활동)을 먼저 선택해주세요.")
 
-
 with tab3 :
     st.write("누가기록을 만들고 싶은 진로활동의 이름을 모두 적어주세요.")
 
@@ -132,7 +131,7 @@ with tab3 :
 
             st.markdown("### 생성된 누가기록 : ")
             chain = (
-            extra_record_prompt
+            career_prompt
             | llm
             | StrOutputParser()
             )

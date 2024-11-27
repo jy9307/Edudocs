@@ -22,55 +22,10 @@ st.set_page_config(
     layout="centered",
 )
 
-# 스타일 커스텀 CSS
-st.markdown(
-    """
-    <style>
-    .login-title {
-        font-size: 24px;
-        font-weight: bold;
-        text-align: center;
-        color: #333333;
-    }
-    .login-input {
-        width: 100%;
-        margin-bottom: 1rem;
-    }
-    .login-button {
-        display: block;
-        width: 100%;
-        background-color: #4CAF50;
-        color: white;
-        border: none;
-        padding: 10px;
-        border-radius: 5px;
-        cursor: pointer;
-        font-size: 16px;
-    }
-    .login-button:hover {
-        background-color: #45a049;
-    }
-    </style>
-    """,
-    unsafe_allow_html=True,
-)
-
 # 로그인 UI
 st.markdown('<div class="login-container">', unsafe_allow_html=True)
 st.markdown('<h2 class="login-title">로그인</h2>', unsafe_allow_html=True)
 
-with st.form("login_form"):
-    username = st.text_input("사용자 이름", placeholder="사용자 이름을 입력하세요", key="username", help="로그인 ID를 입력하세요.")
-    password = st.text_input("비밀번호", type="password", placeholder="비밀번호를 입력하세요", key="password")
-    login_button = st.form_submit_button("로그인")
-
-    if login_button:
-        if username == "admin" and password == "1234":
-            st.success(f"환영합니다, {username}!")
-        else:
-            st.error("사용자 이름 또는 비밀번호가 잘못되었습니다.")
-
-st.markdown('</div>', unsafe_allow_html=True)
 
 # OAuth2 설정
 CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID")
@@ -135,7 +90,7 @@ if "auth" not in st.session_state:
             user_ref.set(user_data)
             points = 0
 
-        st.session_state["auth"] = email
+        st.session_state["auth"] = email.split("@")[0]
         st.session_state["token"] = result["token"]
         st.session_state["point"] = user_data['points']
         st.session_state["last_login"] = user_data['last_login']

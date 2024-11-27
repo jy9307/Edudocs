@@ -289,7 +289,8 @@ for loader in loaders :
 
 for d in docs:
     lines = d.page_content.splitlines()
-    d.metadata['영역'] = lines[0].split("-")[1].strip()
+    if "-" in lines[0] : 
+        d.metadata['영역'] = lines[0].split("-")[1].strip()
     if d.metadata['source'] == '동아리(자율)누가기록.txt' :
         d.metadata['종류'] = '동아리'
 
