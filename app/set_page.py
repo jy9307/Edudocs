@@ -66,6 +66,7 @@ class BasicChatbotPageTemplate() :
         st.set_page_config(
             page_title=title,
             page_icon=emoji,
+            layout='wide'
         )
 
         st.title(title)

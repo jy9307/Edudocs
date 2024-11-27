@@ -56,7 +56,7 @@ pg = st.navigation(
             "게시판" : [review],
             "법령 및 규정": [work_law, educational_laws],
             "교육과정" : [achievement_standard],
-            "나이스" : [student_record, student_feature,subject_record, extra_record],
+            "나이스" : [student_feature,subject_record, extra_record],
             "에듀파인" : [official_document],
             "수업"  : [deep_lesson, edutech_lesson]
                     }

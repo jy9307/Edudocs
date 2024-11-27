@@ -12,6 +12,12 @@ os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = key_path
 # Firestore 클라이언트 초기화
 db = firestore.Client()
 
+st.set_page_config(
+    page_title="EDUDOCS 사용 후기",
+    page_icon=✍️,
+    layout='wide'
+)
+
 st.title("EDUDOCS 사용 후기")
 st.write("사용후기를 남겨서 다른 선생님들께 공유해주세요!")
 
@@ -60,7 +66,7 @@ for doc in docs:
         # 시간 형식 변환 및 표시
         timestamp = msg.get('timestamp', None)
         if timestamp:
-            time_display = datetime.datetime.fromisoformat(timestamp).strftime('%Y-%m-%d %H:%M')
+            time_display = datetime.fromisoformat(timestamp).strftime('%Y-%m-%d %H:%M')
         else:
             time_display = "N/A"
         st.markdown(f"{time_display}")

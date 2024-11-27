@@ -18,7 +18,7 @@ llm = ChatOpenAI(
 
 
 page_template = BasicInputBoxPageTemplate(mh_instance=mh, llm=llm, page_name="deep_lesson")
-page_template.set_title("깊이 있는 수업 단원 설계얀 생성 도우미","🎓")
+page_template.set_title("깊이 있는 수업 단원 설계안 생성 도우미","🎓")
 page_template.input_box(items = ['교과', '역량', '성취기준'])
 page_template.from_retrievers(prompt_name=deep_lesson_prompt, 
                               variables = ["subject", "competency", "achievement_standard"],
