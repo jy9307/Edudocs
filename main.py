@@ -27,7 +27,7 @@ help_page = st.Page("directory/settings/help.py", title = "도움말", icon=":ma
 
 
 ### 게시판
-free_board = st.Page("directory/board/free_board.py", title="자유게시판", icon=":material/work:")
+review = st.Page("directory/board/review.py", title="사용후기", icon=":material/work:")
 
 ### 법령 및 규정
 work_law = st.Page("directory/laws/work_law.py", title="복무규정", icon=":material/work:")
@@ -53,7 +53,7 @@ edutech_lesson = st.Page("directory/lesson/edutech_lesson.py", title="에듀테�
 pg = st.navigation(
     
         {   "계정 관리" : [account_page,help_page],
-            "게시판" : [free_board],
+            "게시판" : [review],
             "법령 및 규정": [work_law, educational_laws],
             "교육과정" : [achievement_standard],
             "나이스" : [student_record, student_feature,subject_record, extra_record],
@@ -71,7 +71,6 @@ with st.sidebar :
     else :
         user_id = st.session_state['auth']
         st.markdown(f"{user_id}님 환영합니다")
-        st.markdown(f"마지막 로그인 : {st.session_state['last_login']}")
         # if st.session_state["auth"] != None :
         #     st.markdown(f"{st.session_state['auth']}님 환영합니다!")
         # else :

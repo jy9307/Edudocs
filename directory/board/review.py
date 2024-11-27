@@ -11,7 +11,8 @@ os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = key_path
 # Firestore 클라이언트 초기화
 db = firestore.Client()
 
-st.title("Firestore를 사용하는 게시판")
+st.title("EDUDOCS 사용 후기")
+st.write("사용후기를 남겨서 다른 선생님들께 공유해주세요!")
 
 # 입력 폼 생성
 with st.form("message_form"):
@@ -19,7 +20,7 @@ with st.form("message_form"):
         st.write(st.session_state['auth'])
         user_name = st.session_state['auth']
     else :
-        user_name = st.text_input("이름")
+        user_name = st.text_input("아이디")
     message = st.text_area("메시지")
     submit = st.form_submit_button("등록")
 
@@ -44,6 +45,9 @@ docs = db.collection('messages').stream()
 
 for doc in docs:
     msg = doc.to_dict()
-    st.subheader(f"{msg['name']}")
-    st.write(f"{msg['message']}")
-    st.write("---")
+    # 사용자 이름을 작게 표시
+    st.markdown(f"**{msg['name']}**", unsafe_allow_html=True)
+    # 메시지를 박스 안에 넣어 정리된 형태로 표시
+    st.info(msg['message'])
+    # 메시지 구분선 추가
+    st.markdown("<hr style='border:1px solid #ddd;'/>", unsafe_allow_html=True)
