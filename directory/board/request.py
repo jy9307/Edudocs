@@ -13,12 +13,12 @@ os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = key_path
 db = firestore.Client()
 
 st.set_page_config(
-    page_title="EDUDOCS 사용 후기",
+    page_title="EDUDOCS 기능 요청",
     layout='wide'
 )
 
-st.title("EDUDOCS 사용 후기")
-st.write("사용후기를 남겨서 다른 선생님들께 공유해주세요!")
+st.title("EDUDOCS 기능 요청")
+st.write("필요한 기능이 있다면 요청해주세요! 최대한 빨리 반영하도록 하겠습니다.")
 
 # 입력 폼 생성
 with st.form("message_form"):

@@ -28,6 +28,7 @@ help_page = st.Page("directory/settings/help.py", title = "도움말", icon=":ma
 
 ### 게시판
 review = st.Page("directory/board/review.py", title="사용후기", icon=":material/work:")
+request = st.Page("directory/board/request.py", title="기능요청", icon=":material/work:")
 
 ### 법령 및 규정
 work_law = st.Page("directory/laws/work_law.py", title="복무규정", icon=":material/work:")
@@ -42,8 +43,9 @@ student_record = st.Page("directory/neis/student_record.py", title="학생부 �
 student_feature = st.Page("directory/neis/student_feature.py", title="행발 생성기", icon=":material/article:")
 subject_record = st.Page("directory/neis/subject_record.py", title="과목 누가기록 생성기", icon=":material/article:")
 
-### 에듀파인
-official_document = st.Page("directory/edufine/official_docs.py", title="공문작성", icon=":material/article:")
+### 행정지원
+official_docs = st.Page("directory/desk_job/official_docs.py", title="공문 생성기", icon=":material/article:")
+commend_docs = st.Page("directory/desk_job/commend_docs.py", title="공적조서 생성기", icon=":material/article:")
 
 ### 수업
 deep_lesson = st.Page("directory/lesson/deep_lesson.py", title="깊이있는 수업 단원 설계", icon=":material/article:")
@@ -53,11 +55,11 @@ edutech_lesson = st.Page("directory/lesson/edutech_lesson.py", title="에듀테�
 pg = st.navigation(
     
         {   "계정 관리" : [account_page,help_page],
-            "게시판" : [review],
+            "게시판" : [review, request],
+            "나이스" : [student_feature,subject_record, extra_record],
+            "행정지원" : [official_docs, commend_docs],
             "법령 및 규정": [work_law, educational_laws],
             "교육과정" : [achievement_standard],
-            "나이스" : [student_feature,subject_record, extra_record],
-            "에듀파인" : [official_document],
             "수업"  : [deep_lesson, edutech_lesson]
                     }
     )

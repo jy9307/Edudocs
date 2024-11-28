@@ -1,6 +1,14 @@
 from langchain_core.prompts import ChatPromptTemplate, FewShotChatMessagePromptTemplate
 
-## input output 예시
+
+## prompt에 예시 첨부를 위한 변수 설정
+example_prompt = ChatPromptTemplate.from_messages(
+    [
+        ("human", "{input}"),
+        ("ai", "{output}"),
+    ]
+)
+
 as_examples = [
     {'input' : "소수의 나눗셈",
      'output' : """ 
@@ -24,18 +32,42 @@ as_examples = [
 """},
 ]
 
-
-## prompt에 예시 첨부를 위한 변수 설정
-as_example_prompt = ChatPromptTemplate.from_messages(
-    [
-        ("human", "{input}"),
-        ("ai", "{output}"),
-    ]
+as_few_shot_prompt = FewShotChatMessagePromptTemplate(
+    example_prompt=example_prompt,
+    examples=as_examples,
 )
 
-as_few_shot_prompt = FewShotChatMessagePromptTemplate(
-    example_prompt=as_example_prompt,
-    examples=as_examples,
+## input output 예시
+commend_examples = [
+    {'input' : "온라인 독서 프로그램 ‘리딩게이트’ 운영 , 원어민영어보조교사 협력 영어 늘봄교실 운영(3~6학년), 여름 방학 영어 캠프 운영",
+     'output' : """
+#### 공적 요지
+2024년 3월부터 12월까지 원어민 영어보조교사와 협력하여 영어 늘봄교실 및 여름방학 영어캠프를 운영하며 영어교육격차 해소 및 학생 영어의사소통 능력 향상에 기여함.
+
+#### 공적 내용
+1. 영어 교과 시간 원어민 영어보조교사 협력 수업\n
+  가. 학년별 맞춤형 협력 수업을 통해 영어교육격차를 해소하고 학생들의 영어 의사소통 능력을 향상시킴.\n
+  나. 실생활에서 영어를 활용할 수 있는 환경을 조성하여 학습 동기 부여에 기여함.\n
+2. 온라인 독서 프로그램 ‘리딩게이트’ 운영\n
+  가. 학생들의 영어 독서 습관 형성을 위해 온라인 교육 프로그램을 도입 및 운영.\n
+  나. 독서 데이터를 기반으로 학습 효과를 분석하며 영어 학습 흥미를 이끌어 냄.\n
+  다. 학생들의 영어 독해력 및 학습 흥미 증대로 성취도 향상을 이룸.\n
+3. 방과 후 및 방학 프로그램 운영\n
+  가. 3~6학년을 대상으로 한 원어민 영어보조교사 협력 영어 늘봄교실을 통해 정규 수업 외 영어 학습 기회를 확대.\n
+  나. 여름 방학 영어 캠프를 운영하여 학생들의 영어 학습 흥미와 창의적 표현 능력을 향상.\n
+  다. 활동 중심의 프로그램을 통해 영어 사용에 대한 자신감을 제고.\n
+4. 지역사회와 연계한 영어교육 기회 확대\n
+  가. 학부모 및 지역사회와 협력하여 학생들의 영어교육격차 해소를 위한 지속적 지원 체계를 구축.\n
+  나. 프로그램 운영 사례를 지역사회와 공유하며 일반화 가능성을 높임.\n
+5. 성과 및 효과\n
+  가. 프로그램 참여 학생들의 영어 독서량 증가, 학습 흥미 증대, 의사소통 능력 향상 등 긍정적 효과 도출.\n
+  나. 학생 및 학부모 만족도를 높이고, 지역 내 영어교육 수준 향상에 기여함.
+"""},
+]
+
+commend_few_shot_prompt = FewShotChatMessagePromptTemplate(
+    example_prompt=example_prompt,
+    examples=commend_examples,
 )
 
 as_prompt =  ChatPromptTemplate.from_messages(
@@ -287,4 +319,38 @@ career_prompt = ChatPromptTemplate.from_messages([
     activities : {activities}
     examples : {examples}"""),
     ("human", "Generate records of students' features in extra activity areas.")
+])
+
+commend_prompt = ChatPromptTemplate.from_messages([
+    ("system", """
+    You are an assistant who helps teachers write down their own commendation documents.
+    The user will provide their outcomes seperated by comma.
+    You need to generate a complete document divided by two parts refering to the outcomes the user provide. 
+
+    Title of Part one would be "공적 요지".
+    It will include a summarized version of the outcomes within 70 characters.
+    A sentence should be based on the six Ws and one H principle.
+    Most of all, it must include the time period which is usually from March to November.
+    Sentences of part one should be finished with "~에 기여함."
+    
+    Title of Part one would be "공적 내용".
+    It will include a concrete version of the outcomes.
+    Sentences of this part must align with the assessment criteria.
+    The assessment criteria are as follows :
+    - Shared awareness and commitment among school members 
+    - Establishment of an implementation system
+    - Appropriateness of operation plans and execution 
+    - Adequacy of program operation
+    - Sustainability of program implementation 
+    - Sharing and generalization of operation cases 
+    - Appropriateness of budget management 
+    - Effectiveness of the program
+     
+    You need to pay special attention to line breaks.     
+    Each part must begin with the title of it.
+      
+
+"""),
+commend_few_shot_prompt,
+("human","""{input}""")
 ])

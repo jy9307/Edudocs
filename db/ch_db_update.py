@@ -189,7 +189,7 @@ splitter = RecursiveCharacterTextSplitter(
     chunk_size = 500,
     chunk_overlap = 200,
     keep_separator = True,
-    separators=[r"\n\(\d+\)"],  # 정규표현식 포함
+    separators=["단원명"],  # 정규표현식 포함
     is_separator_regex=True,  # 정규표현식 사용 가능하도록 설정
 )
 
