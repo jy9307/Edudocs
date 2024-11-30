@@ -85,7 +85,7 @@ if "auth" not in st.session_state:
                 "email": email,
                 "name": name,
                 "points": 0,
-                "last_login": datetime.utcnow(),
+                "last_login": datetime.now(timezone.utc())
             }
             user_ref.set(user_data)
             points = 0

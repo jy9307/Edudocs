@@ -23,7 +23,7 @@ st.set_page_config(
     layout="wide"
 )
 
-st.title("행발 생성기😆")
+st.title("행발 생성기")
 
 with st.container(border= True) :
 	# 설명
@@ -37,20 +37,20 @@ with st.container(border= True) :
 	]
 
 	# 사용자가 선택한 옵션 저장
-	selection = st.pills("", options, selection_mode="multi")
+	selection = st.pills("x", options, selection_mode="multi", label_visibility='collapsed')
 
 	# 선택한 특성에 대해 각각 평가 (아쉬움/뛰어남)
 	evaluation = {}
 	if selection:
-	    st.markdown("##### 2. 각 특성에 대해 평가를 선택하세요:")
-	    for feature in selection:
-	        eval_result = st.radio(feature, ["아쉬움", "뛰어남"], horizontal=True)
-	        evaluation[feature] = eval_result
+            st.markdown("##### 2. 각 특성에 대해 평가를 선택하세요:")
+            for feature in selection:
+                eval_result = st.radio(feature, ["아쉬움", "뛰어남"], horizontal=True)
+                evaluation[feature] = eval_result
 
-	    st.markdown("##### 3. 과목별 역량에 대한 설명을 적어주세요")
-	    st.write("(없을 경우 적지 않으셔도 됩니다)")
-	    strong_subject = st.text_input("""뛰어난 과목""", "없음")
-	    weak_subject = st.text_input("""아쉬운 과목""", "없음")    
+            st.markdown("##### 3. 과목별 역량에 대한 설명을 적어주세요")
+            st.write("(없을 경우 적지 않으셔도 됩니다)")
+            strong_subject = st.text_input("""뛰어난 과목""", "없음")
+            weak_subject = st.text_input("""아쉬운 과목""", "없음")    
 
 
 if st.button("행발 생성!"):

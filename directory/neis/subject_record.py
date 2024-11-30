@@ -24,7 +24,7 @@ st.set_page_config(
     layout="wide"
 )
 
-st.title("과목 누가기록 생성기😆")
+st.title("과목 누가기록 생성기")
 
 st.write("선택한 과목과 영역(활동)에 따라 총 20개의 누가기록 예시가 생성됩니다.")
 
