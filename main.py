@@ -1,10 +1,7 @@
 import streamlit as st
-import requests
+from firebase_admin import firestore
 import streamlit as st
 from streamlit_oauth import OAuth2Component
-import json
-import base64
-import os
 
 
 st.logo("resources/logo.png", size = 'large')
@@ -15,6 +12,7 @@ def logout() :
     st.rerun()
 
 # 페이지 정의
+signup = st.Page("signup.py", title = "회원가입", icon=":material/home:", default=True)
 
 ### 기본 페이지
 home_page = st.Page("directory/home/home.py", title = "홈", icon=":material/home:", default=True)
@@ -85,9 +83,18 @@ with st.sidebar :
     if "auth" not in st.session_state:
         st.markdown("로그인해주세요!")
     else :
+        db = firestore.client()
+
+        user_ref = db.collection("users").document(st.session_state["uid"])
+        user_doc = user_ref.get()
+
+        point_transactions = user_ref.collection('point').stream()
+        total_points = 0
+        for transaction in point_transactions:
+            transaction_data = transaction.to_dict()
+            points = transaction_data.get('points', 0)
+            total_points += points
+
         user_id = st.session_state['auth']
-        st.markdown(f"{user_id}님 환영합니다")
-        # if st.session_state["auth"] != None :
-        #     st.markdown(f"{st.session_state['auth']}님 환영합니다!")
-        # else :
-        #     st.markdown("오프라인 모드")
+        st.markdown(f"{user_id} 선생님")
+        st.markdown(f"잔여 포인트 : {total_points}")

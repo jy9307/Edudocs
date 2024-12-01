@@ -1,9 +1,6 @@
-import firebase_admin
-from firebase_admin import credentials, firestore
-
-# Firebase Admin SDK 초기화
-cred = credentials.Certificate('path/to/serviceAccountKey.json')
-firebase_admin.initialize_app(cred)
+import streamlit as st
+from firebase_admin import firestore
+from datetime import datetime, timezone
 
 # Firestore 클라이언트 가져오기
 db = firestore.client()
@@ -20,14 +17,23 @@ def send_data_to_firestore(collection_name, document_id, data, merge=True):
     except Exception as e:
         print(f"Error adding document: {e}")
 
-# 예제 데이터
-collection_name = "users"
-document_id = "user123"
-data = {
-    "name": "Jay Lee",
-    "email": "jaylee@example.com",
-    "age": 30
-}
+def send_point_used_to_firestore(points,description) :
+    user_ref = db.collection("users").document(st.session_state.get("uid"))
+    point_used_data = {
+        "date": datetime.now(timezone.utc),
+        "points" : -points,
+        "description": f"{description} 사용"
+    }
+    user_ref.collection('point').add(point_used_data)
 
-# 데이터 전송
-send_data_to_firestore(collection_name, document_id, data)
+
+def send_generate_result_to_firestore(service_name, points, result):
+    user_ref = db.collection("users").document(st.session_state.get("uid"))
+    generate_result_data = {
+        "date": datetime.now(timezone.utc),
+        "service_name": service_name,
+        "point_used" : points,
+        "result": result
+    }
+    user_ref.collection('result').add(generate_result_data)
+    send_point_used_to_firestore(points, service_name)

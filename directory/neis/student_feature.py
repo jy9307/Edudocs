@@ -4,6 +4,7 @@ from app.set_documents import load_Document
 from app.set_prompt import student_feature_prompt
 from langchain_openai import ChatOpenAI
 from langchain_core.output_parsers import StrOutputParser
+from tools.db_manage import send_generate_result_to_firestore
 
 mh = MessageHandler()
 
@@ -14,6 +15,9 @@ llm = ChatOpenAI(
     callbacks=[
         ChatCallbackHandler(mh,"student_feature") ],
 )
+
+if "student_feature_messages" not in st.session_state:
+    st.session_state["student_feature_messages"] = []
 
 docs = load_Document().Chroma_select_document("student_feature")
 
@@ -83,6 +87,8 @@ if st.button("행발 생성!"):
                 "strong" : strong_subject,
                 "weak" : weak_subject
                 })
+        if 'auth' in st.session_state :
+            send_generate_result_to_firestore("행발",10, st.session_state["student_feature_messages"][-1]['message'])
 
     else:
         st.warning("먼저 특성을 선택하고 평가를 입력하세요.")
