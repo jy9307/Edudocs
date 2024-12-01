@@ -40,7 +40,7 @@ if "auth" not in st.session_state:
     result = oauth2.authorize_button(
         name="Continue with Google",
         icon="https://www.google.com.tw/favicon.ico",
-        redirect_uri="http://localhost:8501",
+        redirect_uri="https://www.edudocs.site",
         scope="openid email profile",
         key="google",
         extras_params={"prompt": "consent", "access_type": "offline"},

@@ -32,7 +32,7 @@ with col1:
                 style="
                 border: 2px solid #ccc; 
                 border-radius: 8px; 
-                padding: 10px; 
+                padding: 5px; 
                 box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); 
                 background: #f7f7f7; 
                 text-align: center; 
@@ -40,7 +40,8 @@ with col1:
                 color: #333;
             ">
             <a href="http://www.edudocs.site/logout" 
-                style="text-decoration: none; color: #333;">
+                style="text-decoration: none; color: #333;"
+                target="_self">
                 <strong>로그아웃</strong>
             </a>
         </div>
@@ -53,7 +54,7 @@ with col1:
                 style="
                 border: 2px solid #ccc; 
                 border-radius: 8px; 
-                padding: 10px; 
+                padding: 5px; 
                 box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); 
                 background: #f7f7f7; 
                 text-align: center; 
@@ -61,7 +62,8 @@ with col1:
                 color: #333;
             ">
             <a href="http://www.edudocs.site/login" 
-                style="text-decoration: none; color: #333;">
+                style="text-decoration: none; color: #333;"
+                target="_self">
                 <strong>로그인</strong>
             </a>
         </div>
