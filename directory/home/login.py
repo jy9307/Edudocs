@@ -97,8 +97,9 @@ if st.session_state.page == "login":
     else:
         st.switch_page("directory/home/home.py")
 
-elif st.session_state.page == "signup":
+else :
     st.title("추가 정보 입력")
     if st.button("회원가입 완료") :
-        st.success("회원가입이 완료되었습니다!")
+        st.success("회원가입이 완료되었습니다! 다시 로그인하세요.")
+        st.session_state.page = "login"
         st.rerun()
