@@ -2,19 +2,11 @@ import streamlit as st
 from streamlit_oauth import OAuth2Component
 from dotenv import load_dotenv
 import os, base64, json
-import firebase_admin
-from firebase_admin import credentials, auth, firestore
+from firebase_admin import auth
 from datetime import datetime, timezone
 import bcrypt
 
 load_dotenv()
-
-# Firebase Admin SDK 초기화
-if not firebase_admin._apps:
-    cred = credentials.Certificate("firebase_key.json")  # 서비스 계정 키 파일 경로
-    firebase_admin.initialize_app(cred)
-
-db = firestore.client()
 
 # 페이지 기본 설정
 st.set_page_config(

@@ -1,9 +1,17 @@
 import streamlit as st
-from firebase_admin import firestore
+from firebase_admin import firestore, credentials
+import firebase_admin
 import streamlit as st
 from streamlit_oauth import OAuth2Component
 
 st.logo("resources/logo.png")
+
+# Firebase Admin SDK 초기화
+if not firebase_admin._apps:
+    cred = credentials.Certificate("firebase_key.json")  # 서비스 계정 키 파일 경로
+    firebase_admin.initialize_app(cred)
+
+db = firestore.client()
 
 def logout() :
     del st.session_state["auth"]

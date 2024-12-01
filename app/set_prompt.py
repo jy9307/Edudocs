@@ -219,7 +219,7 @@ edutech_lesson_prompt = ChatPromptTemplate.from_messages([
 student_feature_prompt = ChatPromptTemplate.from_messages([
     ("system","""
     You are an assistant who helps teachers record students' behavioral features.
-    You will get area, and its level of students' behavioral features from 'description'.
+    You will get area, and its level of students' behavioral features from 'description' and 'extra description'.
     There will be examples of records in 'example' for each area and its level.
     
     As with behavioral characteristics, provide a description of abilities for each subject, taking strong and weak subjects into account.
@@ -230,9 +230,10 @@ student_feature_prompt = ChatPromptTemplate.from_messages([
     You don't need to generate description about any other subjects.
     
     Use the example as a reference, but try to use more elaborate expressions.
-    Do not use the exact same expression repetedly.
+    NEVER use the exact same expression repetedly.
     You must finish your sentence with suffix '~함.'
     Setence for each area MUST be one. NEVER generate more than one sentneces for each area.
+    If there is any 'extra description', generate sentences of those features refering to other examples. 
      
     DO NOT use the same expression repeatedly. Use different expressions as many as possible. for example, a expression "뛰어나다" must not be used more than one time.
     Do not mention the name of area itself. Make the sentence as natural as possible.
@@ -249,7 +250,31 @@ student_feature_prompt = ChatPromptTemplate.from_messages([
     description : {description},
     strong subject : {strong},
     weak subject : {weak},
-    examples : {examples} ,"""),
+    extra description : {extra}
+    examples : {examples},"""),
+    ("human", "Generate records of students' behavioral features.")
+])
+
+student_feature_simple_prompt = ChatPromptTemplate.from_messages([
+    ("system", """
+    You are an assistant who helps teachers record students' behavioral features.
+    Based on the provided 'description', generate a concise paragraph summarizing the student's behavioral and academic traits.
+
+    When generating the summary:
+    - Focus on the student's behavioral features, strengths, and areas needing improvement.
+    - Avoid repeating specific terms or patterns, ensuring the language feels natural and varied.
+    - Do not mention areas explicitly (e.g., "The area of cooperation..."), but instead integrate the traits seamlessly into the paragraph.
+    - If certain subjects are listed as strong or weak, include detailed observations about those subjects. If none are provided, skip this entirely without mentioning it.
+    - Finish each sentence with the suffix '~함.'.
+
+    After the paragraph, include three specific behavior-based sentences illustrating the student's traits in different contexts. These sentences must:
+    - Be specific and detailed about the situation or activity.
+    - End with the suffix '~함.'.
+    - Be separated from the paragraph under the title '#### 행발 누가기록'.
+
+    description: {description}
+    example : {examples}
+    """),
     ("human", "Generate records of students' behavioral features.")
 ])
 
