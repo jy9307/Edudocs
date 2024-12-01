@@ -113,6 +113,7 @@ elif "auth" not in st.session_state:
                 if stored_password and bcrypt.checkpw(password.encode('utf-8'), stored_password.encode('utf-8')):
                     st.session_state["auth"] = username
                     st.session_state["point"] = user_data.get('points', 0)
+                    st.session_state["uid"] = user_doc.id 
                     st.session_state.page = "home"
                     st.success("로그인 성공!")
                     st.rerun()
