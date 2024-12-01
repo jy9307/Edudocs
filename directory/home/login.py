@@ -40,7 +40,7 @@ if "auth" not in st.session_state:
     result = oauth2.authorize_button(
         name="Continue with Google",
         icon="https://www.google.com.tw/favicon.ico",
-        redirect_uri="https://www.edudocs.site",
+        redirect_uri="http://localhost:8501",
         scope="openid email profile",
         key="google",
         extras_params={"prompt": "consent", "access_type": "offline"},
@@ -93,8 +93,6 @@ if "auth" not in st.session_state:
         st.session_state["auth"] = email.split("@")[0]
         st.session_state["token"] = result["token"]
         st.session_state["point"] = user_data['points']
-        st.session_state["last_login"] = user_data['last_login']
-        print("rerun전")
         st.rerun()
 else:
     st.success("이미 로그인 상태입니다.")
