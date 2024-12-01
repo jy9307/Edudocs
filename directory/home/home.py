@@ -70,7 +70,7 @@ with col1:
         """
         st.markdown(login_html, unsafe_allow_html=True)
 with col2:
-        login_html = """
+        help_html = """
         <div 
                 style="
                 border: 2px solid #ccc; 
@@ -89,6 +89,7 @@ with col2:
             </a>
         </div>
         """
+        st.markdown(help_html, unsafe_allow_html=True)
 
 
 with st.container(border=True) : 
