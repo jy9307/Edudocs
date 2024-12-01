@@ -91,6 +91,7 @@ with col2:
         """
         st.markdown(help_html, unsafe_allow_html=True)
 
+st.write("")
 
 with st.container(border=True) : 
     st.write("""
