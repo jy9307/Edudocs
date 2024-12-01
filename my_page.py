@@ -2,9 +2,9 @@ import streamlit as st
 import pandas as pd
 
 def main_page(user_info):
-    st.title("마이 페이지")
+    st.title("내 정보")
 
-    st.write(f"**아이디**: {user_info.get('name', 'N/A')}")
+    st.write(f"**ID**: {user_info.get('name', 'N/A')}")
     st.write(f"**이메일**: {user_info.get('email', 'N/A')}")
     st.write(f"**가입일자**: {user_info.get('member_since', 'N/A')}")
     st.write(f"**잔여 포인트**: {user_info.get('remaining_points', '0')}")
