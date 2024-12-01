@@ -49,27 +49,27 @@ with col1:
         st.markdown(logout_html, unsafe_allow_html=True)
     else:
         # 'auth'가 없을 때: 로그인 버튼 표시
-        st.page_link("directory/home/login.py", label="로그인")
-        # login_html = """
-        # <div 
-        #         style="
-        #         border: 2px solid #ccc; 
-        #         border-radius: 8px; 
-        #         padding: 5px; 
-        #         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); 
-        #         background: #f7f7f7; 
-        #         text-align: center; 
-        #         font-family: Arial, sans-serif; 
-        #         color: #333;
-        #     ">
-        #     <a href="http://www.edudocs.site/login" 
-        #         style="text-decoration: none; color: #333;"
-        #         target="_self">
-        #         <strong>로그인</strong>
-        #     </a>
-        # </div>
-        # """
-        # st.markdown(login_html, unsafe_allow_html=True)
+        # st.page_link("directory/home/login.py", label="로그인")
+        login_html = """
+        <div 
+                style="
+                border: 2px solid #ccc; 
+                border-radius: 8px; 
+                padding: 5px; 
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); 
+                background: #f7f7f7; 
+                text-align: center; 
+                font-family: Arial, sans-serif; 
+                color: #333;
+            ">
+            <a href="http://www.edudocs.site/login" 
+                style="text-decoration: none; color: #333;"
+                target="_self">
+                <strong>로그인</strong>
+            </a>
+        </div>
+        """
+        st.markdown(login_html, unsafe_allow_html=True)
 with col2:
         help_html = """
         <div 
