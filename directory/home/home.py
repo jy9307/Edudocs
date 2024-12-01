@@ -23,48 +23,50 @@ st.markdown("""
 # 버튼 생성
 col1, col2 = st.columns([1, 1])  # 두 개의 버튼을 나란히 배치
 
-with col1:
-    if "auth" in st.session_state:
-        # 'auth'가 존재할 때: 로그아웃 버튼 표시
-        logout_html = """
-        <div 
-                style="
-                border: 2px solid #ccc; 
-                border-radius: 8px; 
-                padding: 5px; 
-                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); 
-                background: #f7f7f7; 
-                text-align: center; 
-                font-family: Arial, sans-serif; 
-                color: #333;
-                cursor: pointer;
-            " 
-            onclick="window.location.replace('http://www.edudocs.site/logout');">
-            <strong>로그아웃</strong>
-        </div>
-        """
-        st.markdown(logout_html, unsafe_allow_html=True)
-    else:
-        # 'auth'가 없을 때: 로그인 버튼 표시
-        login_html = """
-        <div 
-                style="
-                border: 2px solid #ccc; 
-                border-radius: 8px; 
-                padding: 5px; 
-                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); 
-                background: #f7f7f7; 
-                text-align: center; 
-                font-family: Arial, sans-serif; 
-                color: #333;
-                cursor: pointer;
-            " 
-            onclick="window.location.replace('http://www.edudocs.site/login');">
-            <strong>로그인</strong>
-        </div>
-        """
-        st.markdown(login_html, unsafe_allow_html=True)
 
+    with col1:
+        if "auth" in st.session_state:
+            # 'auth'가 존재할 때: 로그아웃 버튼 표시
+            logout_html = """
+            <div 
+                 style="
+                    border: 2px solid #ccc; 
+                    border-radius: 8px; 
+                    padding: 10px; 
+                    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); 
+                    background: #f7f7f7; 
+                    text-align: center; 
+                    font-family: Arial, sans-serif; 
+                    color: #333;
+                ">
+                <a href="http://www.edudocs.site/logout" 
+                   style="text-decoration: none; color: #333;">
+                   <strong>로그아웃</strong>
+                </a>
+            </div>
+            """
+            st.markdown(logout_html, unsafe_allow_html=True)
+        else:
+            # 'auth'가 없을 때: 로그인 버튼 표시
+            login_html = """
+            <div 
+                 style="
+                    border: 2px solid #ccc; 
+                    border-radius: 8px; 
+                    padding: 10px; 
+                    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); 
+                    background: #f7f7f7; 
+                    text-align: center; 
+                    font-family: Arial, sans-serif; 
+                    color: #333;
+                ">
+                <a href="http://www.edudocs.site/login" 
+                   style="text-decoration: none; color: #333;">
+                   <strong>로그인</strong>
+                </a>
+            </div>
+            """
+            st.markdown(login_html, unsafe_allow_html=True)
 with col2:
     with stylable_container(
     key="help_columns",

@@ -75,11 +75,9 @@ if "auth" not in st.session_state:
         user_doc = user_ref.get()
 
         if user_doc.exists:
-            print("상태:user_doc.exists")
             user_data = user_doc.to_dict()
             points = user_data.get("points", 0)
         else:
-            print("상태 : user_doc.없음")
             # 사용자 초기 데이터 생성
             user_data = {
                 "email": email,
