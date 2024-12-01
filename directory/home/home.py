@@ -26,36 +26,27 @@ col1, col2 = st.columns([1, 1])  # 두 개의 버튼을 나란히 배치
 
 with col1:
     if "auth" in st.session_state:
-        # CSS 스타일 정의
-        logout_button_css = """
-        <style>
-            .logout-button {
+        # 'auth'가 존재할 때: 로그아웃 버튼 표시
+        logout_html = """
+        <div 
+                style="
                 border: 2px solid #ccc; 
                 border-radius: 8px; 
-                padding: 10px 20px; 
+                padding: 5px; 
                 box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); 
                 background: #f7f7f7; 
                 text-align: center; 
                 font-family: Arial, sans-serif; 
-                color: #333; 
-                cursor: pointer;
-                display: inline-block;
-            }
-            .logout-button:hover {
-                background: #e0e0e0; /* 마우스 오버 효과 */
-            }
-        </style>
+                color: #333;
+            ">
+            <a href="http://www.edudocs.site/logout" 
+                style="text-decoration: none; color: #333;"
+                target="_self">
+                <strong>로그아웃</strong>
+            </a>
+        </div>
         """
-        st.markdown(logout_button_css, unsafe_allow_html=True)
-
-        # 로그아웃 버튼
-        if st.button("로그아웃", key="logout", help="로그아웃"):
-            # 세션 상태 초기화 및 새로고침
-            del st.session_state["auth"]
-            if "token" in st.session_state:
-                del st.session_state["token"]
-            st.rerun()
-
+        st.markdown(logout_html, unsafe_allow_html=True)
     else:
         # 'auth'가 없을 때: 로그인 버튼 표시
         login_html = """
@@ -78,7 +69,6 @@ with col1:
         </div>
         """
         st.markdown(login_html, unsafe_allow_html=True)
-
 with col2:
         login_html = """
         <div 
