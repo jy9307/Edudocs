@@ -85,7 +85,7 @@ if st.session_state.page == "login":
                     "email": email,
                     "name": name,
                     "points": 0,
-                    "signup_date": datetime.now(timezone.utc())
+                    "signup_date": datetime.now(timezone.utc)
                 }
                 user_ref.set(user_data)
                 points = 0
