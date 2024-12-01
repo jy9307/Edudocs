@@ -3,8 +3,7 @@ from firebase_admin import firestore
 import streamlit as st
 from streamlit_oauth import OAuth2Component
 
-
-st.logo("resources/logo.png", size = 'large')
+st.logo("resources/logo.png")
 
 def logout() :
     del st.session_state["auth"]
@@ -12,7 +11,6 @@ def logout() :
     st.rerun()
 
 # 페이지 정의
-signup = st.Page("signup.py", title = "회원가입", icon=":material/home:", default=True)
 
 ### 기본 페이지
 home_page = st.Page("directory/home/home.py", title = "홈", icon=":material/home:", default=True)
