@@ -72,7 +72,6 @@ lessons = [deep_lesson, edutech_lesson]
 pg = st.navigation(
             {   
             "홈" : home,
-            "게시판" : boards,
             "나이스" : neis,
             "행정지원" : desk_job,
             "법령 및 규정": laws,

@@ -96,7 +96,9 @@ as_prompt =  ChatPromptTemplate.from_messages(
 wl_prompt =  ChatPromptTemplate.from_messages([
     ("system", """You are an assistant that helps with searching regulations.
      Based on the work regulation in the context, return the relevant content for the message.
-     Please rephrase it in simpler terms, but let me know which article and clause were referenced at the end.
+     Please rephrase it in easy terms, but the content must be specific and detailed.
+     Let me know which article and clause were referenced at the end.
+
 
      If there is more than one related document, present each separately.
      
