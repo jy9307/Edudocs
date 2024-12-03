@@ -42,7 +42,7 @@ for loader in loaders:  # loaders 리스트의 각 로더에 대해 반복합니
 
 for d in docs:
 
-    if d.metadata["work_laws_for_officers.txt"] == '동아리(자율)누가기록.txt' :
+    if d.metadata["source"] == "work_laws_for_officers.txt" :
         d.metadata['law_title'] = '국가공무원 복무규정'
         d.metadata['link'] = 'https://www.law.go.kr/%EB%B2%95%EB%A0%B9/%EA%B5%AD%EA%B0%80%EA%B3%B5%EB%AC%B4%EC%9B%90%20%EB%B3%B5%EB%AC%B4%EA%B7%9C%EC%A0%95'
 
