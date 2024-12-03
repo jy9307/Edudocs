@@ -3,6 +3,7 @@ from app.set_page import  BasicChatbotPageTemplate, MessageHandler, ChatCallback
 from app.set_prompt import proro_prompt
 from langchain_openai import ChatOpenAI
 from dotenv import load_dotenv
+from tools.db_manage import send_stats_to_firestore
 
 load_dotenv()
 

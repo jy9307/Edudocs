@@ -4,6 +4,7 @@ from app.set_prompt import deep_lesson_prompt
 from langchain_openai import ChatOpenAI
 from dotenv import load_dotenv
 
+
 load_dotenv()
 
 mh = MessageHandler()

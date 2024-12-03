@@ -4,7 +4,7 @@ from app.set_documents import load_Document
 from app.set_prompt import commend_prompt
 from langchain_openai import ChatOpenAI
 from langchain_core.output_parsers import StrOutputParser
-from tools.db_manage import send_generate_result_to_firestore
+from tools.db_manage import send_generate_result_to_firestore,send_stats_to_firestore
 
 mh = MessageHandler()
 
@@ -50,6 +50,6 @@ if st.button("공적조서 생성"):
             "input" : outcomes
         })
         if 'auth' in st.session_state :
-            send_generate_result_to_firestore("공문 생성기", 10, result=st.session_state["commend_docs_messages"][-1]['message'])
+            send_generate_result_to_firestore("공문 생성기", 0, result=st.session_state["commend_docs_messages"][-1]['message'])
     else :
         st.warning("활동을 먼저 적어주세요.")

@@ -10,6 +10,7 @@ from langchain.chains.query_constructor.base import AttributeInfo
 from langchain.retrievers.self_query.base import SelfQueryRetriever
 from langchain.retrievers.multi_query import MultiQueryRetriever
 from dotenv import load_dotenv
+from tools.db_manage import send_stats_to_firestore
 
 load_dotenv()
 
@@ -96,7 +97,8 @@ page_template = BasicChatbotPageTemplate(mh, llm, "achievement_standard")
 page_template.set_title("성취기준","🎓")
 
 page_info = """본 페이지에서는 2022 개정 교육과정 성취기준을 확인할 수 있습니다. \n
-주제를 적으면 관련된 성취기준을 찾아드립니다!."""
+주제를 적으면 관련된 성취기준을 찾아드립니다!. \n
+학년, 과목 및 주제를 함께 적으시면 더 높은 정확도로 성취기준을 찾을 수 있습니다."""
 
 page_template.set_chat_ui(as_prompt,
                           page_info,

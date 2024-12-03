@@ -4,7 +4,7 @@ from app.set_documents import load_Document
 from app.set_prompt import subject_record_prompt
 from langchain_openai import ChatOpenAI
 from langchain_core.output_parsers import StrOutputParser
-from tools.db_manage import send_generate_result_to_firestore
+from tools.db_manage import send_generate_result_to_firestore, send_stats_to_firestore
 
 mh = MessageHandler()
 
@@ -71,8 +71,9 @@ if st.button("누가기록 생성!"):
             "subject" : selection,
             "examples" : examples,
          })
+        send_stats_to_firestore("subject_record")
         if 'auth' in st.session_state :
-            send_generate_result_to_firestore("과목 누가기록",10, st.session_state["subject_record_messages"][-1]['message'])
+            send_generate_result_to_firestore("과목 누가기록",0, st.session_state["subject_record_messages"][-1]['message'])
     else :
         st.warning("과목과 세부 영역(활동)을 먼저 선택해주세요.")
 

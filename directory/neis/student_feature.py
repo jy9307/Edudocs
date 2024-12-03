@@ -4,14 +4,14 @@ from app.set_documents import load_Document
 from app.set_prompt import student_feature_prompt, student_feature_simple_prompt
 from langchain_openai import ChatOpenAI
 from langchain_core.output_parsers import StrOutputParser
-from tools.db_manage import send_generate_result_to_firestore
+from tools.db_manage import send_generate_result_to_firestore, send_stats_to_firestore
 
 mh = MessageHandler()
-
 llm = ChatOpenAI(
     temperature=0.9,
     model='gpt-4o-mini',
     streaming= True,
+    stream_usage=True,
     callbacks=[
         ChatCallbackHandler(mh,"student_feature") ],
 )
@@ -30,8 +30,8 @@ st.set_page_config(
 st.title("행발 생성기")
 st.write("""
          - 특성 기반 생성기는 다양한 옵션을 사전 제공하고 이를 바탕으로 행발을 생성합니다. 
-         - 간단 생성기는 선생님이 기술한 내용만을 바탕으로 행발을 생성합니다.""")
-tab1, tab2= st.tabs(["특성 기반 생성", "간단 생성"])
+         - 간편 생성기는 선생님이 기술한 내용만을 바탕으로 행발을 생성합니다.""")
+tab1, tab2= st.tabs(["특성 기반 생성", "간편 생성"])
 
 with tab1 :
     with st.container(border= True) :
@@ -91,18 +91,21 @@ with tab1 :
             chain = (
                 student_feature_prompt
                 |llm
-                |StrOutputParser()
                 )
             with st.container(border=True) :
-                chain.invoke({
+                result = chain.invoke({
                     "description" : features,
                     "examples" : examples,
                     "strong" : strong_subject,
                     "weak" : weak_subject,
                     "extra" : extra_feature
                     })
+                token_usage = round(result.usage_metadata['total_tokens']*0.02)
+                print(token_usage)
+            send_stats_to_firestore("student_feature")
             if 'auth' in st.session_state :
                 send_generate_result_to_firestore("행발",10, st.session_state["student_feature_messages"][-1]['message'])
+                
 
         else:
             st.warning("먼저 특성을 선택하고 평가를 입력하세요.")
@@ -111,7 +114,7 @@ with tab2 :
     st.markdown("##### 학생의 특징을 적어주세요.")
     description = st.text_input("""ex) 교우관계가 좋음, 수업에 열정적으로 참여함, 고집이 셈, 에너지가 넘침 등""", "")
 
-    if st.button("행발 생성!", key="간단"):
+    if st.button("행발 생성!", key="간편"):
         examples = docs.as_retriever().batch(["description"])
 
         st.markdown("### 생성된 행발")
@@ -125,8 +128,10 @@ with tab2 :
                 "description" : description,
                 "examples" : examples[0]
                 })
+        send_stats_to_firestore("student_feature_simple")
         if 'auth' in st.session_state :
             send_generate_result_to_firestore("행발",10, st.session_state["student_feature_messages"][-1]['message'])
+            
 
 
 

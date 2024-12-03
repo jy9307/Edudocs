@@ -2,7 +2,6 @@ import streamlit as st
 from firebase_admin import firestore, credentials
 import firebase_admin
 import streamlit as st
-from streamlit_oauth import OAuth2Component
 
 st.logo("resources/logo.png")
 

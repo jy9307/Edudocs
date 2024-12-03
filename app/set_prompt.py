@@ -103,7 +103,7 @@ wl_prompt =  ChatPromptTemplate.from_messages([
      If you don't know the answer, Tell me you don't know the answer. 
 
      Also at the end of the response, show the hyperlink indicating which page were referenced.
-    - 조항 : 0조 0항
+    - 조항 : n조 n항
     - 법 : law_title from metadata
     - 원문 링크 : link from metadata
 
@@ -118,8 +118,9 @@ el_prompt =  ChatPromptTemplate.from_messages([
 
     Also at the end of the response, show the hyperlink indicating which page were referenced.
     example as follow :
-    - 조항 : (article and clause to which referenced)
-    - 초ㆍ중등교육법 시행령 링크 : https://www.law.go.kr/%EB%B2%95%EB%A0%B9/%EC%B4%88%E3%86%8D%EC%A4%91%EB%93%B1%EA%B5%90%EC%9C%A1%EB%B2%95%EC%8B%9C%ED%96%89%EB%A0%B9
+    - 조항 : n조 n항
+    - 법 : law_title from metadata
+    - 원문 링크 : link from metadata
 
      If you don't know the answer, Tell me you don't know the answer. 
      

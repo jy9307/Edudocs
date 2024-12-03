@@ -4,7 +4,7 @@ from app.set_documents import load_Document
 from app.set_prompt import extra_record_prompt, career_prompt
 from langchain_openai import ChatOpenAI
 from langchain_core.output_parsers import StrOutputParser
-from tools.db_manage import send_generate_result_to_firestore
+from tools.db_manage import send_generate_result_to_firestore, send_stats_to_firestore
 
 mh = MessageHandler()
 
@@ -71,8 +71,10 @@ with tab1 :
                 "u_area" : unregistered_area,
                 "examples" : examples,
             })
+            send_stats_to_firestore("extra_record_self")
             if 'auth' in st.session_state :
                 send_generate_result_to_firestore("창체 누가기록",10, st.session_state["extra_record_messages"][-1]['message'])
+                
         
         else :
             st.warning("과목과 세부 영역(활동)을 먼저 선택해주세요.")
@@ -117,6 +119,7 @@ with tab2 :
                 "area" : area,
                 "examples" : examples,
             })
+            send_stats_to_firestore("extra_record_club")
             if 'auth' in st.session_state :
                 send_generate_result_to_firestore("창체 누가기록",10, st.session_state["extra_record_messages"][-1]['message'])
         else :
@@ -148,6 +151,7 @@ with tab3 :
                 "activities" : activities,
                 "examples" : examples,
             })
+            send_stats_to_firestore("extra_record_career")
             if 'auth' in st.session_state :
                 send_generate_result_to_firestore("창체 누가기록",10, st.session_state["extra_record_messages"][-1]['message'])
         else :

@@ -25,9 +25,11 @@ splitter = RecursiveCharacterTextSplitter(
 
 loaders = [
     # 파일을 로드합니다.
-    TextLoader("work_laws.txt"),
+    TextLoader("work_laws_for_officers.txt"),
     TextLoader("work_laws_for_educator.txt")
 ]
+
+
 
 docs = []  # 빈 리스트를 생성합니다.
 
@@ -36,6 +38,17 @@ for loader in loaders:  # loaders 리스트의 각 로더에 대해 반복합니
     docs.extend(
         loader.load_and_split(text_splitter=splitter)
     )  
+
+
+for d in docs:
+
+    if d.metadata["work_laws_for_officers.txt"] == '동아리(자율)누가기록.txt' :
+        d.metadata['law_title'] = '국가공무원 복무규정'
+        d.metadata['link'] = 'https://www.law.go.kr/%EB%B2%95%EB%A0%B9/%EA%B5%AD%EA%B0%80%EA%B3%B5%EB%AC%B4%EC%9B%90%20%EB%B3%B5%EB%AC%B4%EA%B7%9C%EC%A0%95'
+
+    else :
+        d.metadata['law_title'] = '교육공무원법'
+        d.metadata['link'] = 'https://www.law.go.kr/%EB%B2%95%EB%A0%B9/%EA%B5%90%EC%9C%A1%EA%B3%B5%EB%AC%B4%EC%9B%90%EB%B2%95'
 
 # 문서를 디스크에 저장합니다. 저장시 persist_directory에 저장할 경로를 지정합니다.
 persist_db = Chroma.from_documents(

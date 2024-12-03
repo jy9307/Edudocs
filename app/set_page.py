@@ -4,7 +4,7 @@ from langchain_core.runnables import RunnablePassthrough
 from langchain_core.output_parsers import StrOutputParser
 from langchain.callbacks.base import BaseCallbackHandler
 from app.set_documents import load_Document
-from tools.db_manage import send_generate_result_to_firestore
+from tools.db_manage import send_generate_result_to_firestore, send_stats_to_firestore
 
 class MessageHandler() :
     def __init__(self) :
@@ -100,8 +100,9 @@ class BasicChatbotPageTemplate() :
             )
             with st.chat_message("ai"):
                 chain.invoke(message)
+                send_stats_to_firestore(self.page_name)
                 if 'auth' in st.session_state :
-                    send_generate_result_to_firestore(self.title, 10, result=st.session_state[self.message_cache_name][-1]['message'])
+                    send_generate_result_to_firestore(self.title, 0, result=st.session_state[self.message_cache_name][-1]['message'])
                 
         
     def set_chat_ui_with_retriever(self,
@@ -126,6 +127,7 @@ class BasicChatbotPageTemplate() :
                 | self.llm
                 | StrOutputParser()
             )
+            send_stats_to_firestore(self.page_name)
             with st.chat_message("ai"):
                 chain.invoke(message)
 
@@ -184,6 +186,7 @@ class BasicInputBoxPageTemplate() :
                 **variables,
                 "input" : input
                 })
+            send_stats_to_firestore(self.page_name)
             if 'auth' in st.session_state :
-                send_generate_result_to_firestore(self.title, 10, result=st.session_state[self.message_cache_name][-1]['message'])
+                send_generate_result_to_firestore(self.title, 0, result=st.session_state[self.message_cache_name][-1]['message'])
         return

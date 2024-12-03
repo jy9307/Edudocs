@@ -7,6 +7,7 @@ from app.set_prompt import edutech_lesson_prompt
 from app.set_page import BasicChatbotPageTemplate
 from langchain_openai import ChatOpenAI
 from dotenv import load_dotenv
+from tools.db_manage import send_generate_result_to_firestore, send_stats_to_firestore
 
 load_dotenv()
 
@@ -47,5 +48,9 @@ if message :
         | StrOutputParser()
     )
 
+
     with st.chat_message("ai"):
         chain.invoke(message)
+        send_stats_to_firestore("deep_lesson")
+        if 'auth' in st.session_state :
+            send_generate_result_to_firestore("깊이있는 수업",0, st.session_state["deep_lesson_messages"][-1]['message'])
