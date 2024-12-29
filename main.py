@@ -2,6 +2,9 @@ import streamlit as st
 from firebase_admin import firestore, credentials
 import firebase_admin
 import streamlit as st
+import streamlit.components.v1 as components
+
+
 
 st.logo("resources/logo.png")
 
@@ -71,7 +74,7 @@ lessons = [deep_lesson, edutech_lesson]
 
 pg = st.navigation(
             {   
-            "홈" : home,
+            "홈" : [home_page,help_page],
             "나이스" : neis,
             "행정지원" : desk_job,
             "법령 및 규정": laws,
@@ -80,25 +83,64 @@ pg = st.navigation(
             }
         )
 
+
+
 pg.run()
 
 
-with st.sidebar :
-    if "auth" not in st.session_state:
-        st.markdown("로그인해주세요!")
-    else :
-        db = firestore.client()
 
-        user_ref = db.collection("users").document(st.session_state["uid"])
-        user_doc = user_ref.get()
+footer="""
+<style>
+/* 링크 스타일: footer에만 영향을 미치도록 범위 제한 */
+.footer a:link, .footer a:visited {
+    color: blue;
+    text-decoration: underline;
+}
 
-        point_transactions = user_ref.collection('point').stream()
-        total_points = 0
-        for transaction in point_transactions:
-            transaction_data = transaction.to_dict()
-            points = transaction_data.get('points', 0)
-            total_points += points
+.footer a:hover, .footer a:active {
+    color: red;
+    text-decoration: underline;
+}
 
-        user_id = st.session_state['auth']
-        st.markdown(f"{user_id} 선생님")
-        st.markdown(f"잔여 포인트 : {total_points}")
+/* Footer 스타일 */
+.footer {
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    background-color: #f9f9f9; /* 약간의 회색 배경 추가 */
+    color: #333; /* 텍스트 색상 변경 */
+    text-align: center;
+    font-family: Arial, sans-serif; /* 기본 글꼴 적용 */
+    font-size: 14px;
+    padding: 10px 0;
+    box-shadow: 0 -1px 5px rgba(0, 0, 0, 0.1); /* 위쪽 그림자 추가 */
+}
+</style>
+
+<div class="footer">
+    <p>Developed by <strong>TEAM EASE</strong></p>
+</div>
+"""
+st.markdown(footer,unsafe_allow_html=True)
+
+
+# with st.sidebar :
+#     if "auth" not in st.session_state:
+#         st.markdown("로그인해주세요!")
+#     else :
+#         db = firestore.client()
+
+#         user_ref = db.collection("users").document(st.session_state["uid"])
+#         user_doc = user_ref.get()
+
+#         point_transactions = user_ref.collection('point').stream()
+#         total_points = 0
+#         for transaction in point_transactions:
+#             transaction_data = transaction.to_dict()
+#             points = transaction_data.get('points', 0)
+#             total_points += points
+
+#         user_id = st.session_state['auth']
+#         st.markdown(f"{user_id} 선생님")
+#         st.markdown(f"잔여 포인트 : {total_points}")

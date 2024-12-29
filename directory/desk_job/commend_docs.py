@@ -4,6 +4,7 @@ from app.set_documents import load_Document
 from app.set_prompt import commend_prompt
 from langchain_openai import ChatOpenAI
 from langchain_core.output_parsers import StrOutputParser
+import requests
 from tools.db_manage import send_generate_result_to_firestore,send_stats_to_firestore
 
 mh = MessageHandler()
@@ -38,18 +39,20 @@ if st.button("공적조서 생성"):
     if outcomes != "" :
 
         st.markdown("### 생성된 공적 조서 : ")
-        chain = (
-        commend_prompt
-        | llm
-        | StrOutputParser()
-        )
+        # chain = (
+        # commend_prompt
+        # | llm
+        # | StrOutputParser()
+        # )
 
 
         with st.container(border=True) :
-            chain.invoke({
-            "input" : outcomes
-        })
-        if 'auth' in st.session_state :
-            send_generate_result_to_firestore("공문 생성기", 0, result=st.session_state["commend_docs_messages"][-1]['message'])
+            with st.spinner("대답을 생성중입니다! 잠시만 기다려주세요...."):
+                response_data = requests.post("http://127.0.0.1:8000/CommendProcess", json={"input" : outcomes})
+                result = response_data.json()
+                st.markdown("### 공적조서")
+                st.write(result['result'])
+        # if 'auth' in st.session_state :
+            # send_generate_result_to_firestore("공문 생성기", 0, result=st.session_state["commend_docs_messages"][-1]['message'])
     else :
         st.warning("활동을 먼저 적어주세요.")

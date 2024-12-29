@@ -116,16 +116,17 @@ persist_db = Chroma.from_documents(
 #-------------------------------------------------------공문
 
 splitter = RecursiveCharacterTextSplitter(
-    chunk_size = 100,
+    chunk_size = 200,
     chunk_overlap = 0,
     keep_separator = True,
-    separators=["기안문"],  # 정규표현식 포함
+    separators=["범주"],  # 정규표현식 포함
     is_separator_regex=True,  # 정규표현식 사용 가능하도록 설정
 )
 
 
 loaders = [
     # 파일을 로드합니다.
+    
     TextLoader("./official_document.txt"),
 ]
 
@@ -136,6 +137,14 @@ for loader in loaders:  # loaders 리스트의 각 로더에 대해 반복합니
     )
      # 로더를 사용하여 문서를 로드하고 docs 리스트에 추가합니다.
 
+cats = []
+for d in docs :
+    lines = d.page_content.splitlines()
+    d.metadata['category'] = lines[0].split(":")[1].strip()
+    cats.append(d.metadata['category'])
+
+cats = list(set(cats))
+print(cats)
 
 # 문서를 디스크에 저장합니다. 저장시 persist_directory에 저장할 경로를 지정합니다.
 persist_db = Chroma.from_documents(
@@ -228,7 +237,7 @@ splitter = RecursiveCharacterTextSplitter(
     chunk_size = 50,
     chunk_overlap = 0,
     keep_separator = True,
-    separators=[r"\d+"],  # 정규표현식 포함
+    separators=[r"영역"],  # 정규표현식 포함
     is_separator_regex=True,  # 정규표현식 사용 가능하도록 설정
 )
 
@@ -239,10 +248,17 @@ for loader in loaders :
         loader.load_and_split(text_splitter=splitter)
     )
 
+area = []
 for d in docs:
     lines = d.page_content.splitlines()
-    d.metadata['영역'] = lines[1].split(":")[1].strip()
-    d.metadata['수준'] = lines[2].split(":")[1].strip()
+    print("------------------")
+    print(d)
+    
+    d.metadata['영역'] = lines[0].split(":")[1].strip()
+    d.metadata['수준'] = lines[1].split(":")[1].strip()
+    area.append(d.metadata['영역'])
+area = set(area)
+print(area)
 
 persist_db = Chroma.from_documents(
     docs, OpenAIEmbeddings(), persist_directory=DB_PATH, collection_name="student_feature"
@@ -272,6 +288,9 @@ for loader in loaders :
 for d in docs:
     lines = d.page_content.splitlines()
     d.metadata['과목'] = lines[0].split(" ")[1]
+    print(d)
+
+
 
 persist_db = Chroma.from_documents(
     docs, OpenAIEmbeddings(), persist_directory=DB_PATH, collection_name="subject_record"
@@ -300,19 +319,61 @@ for loader in loaders :
         loader.load_and_split(text_splitter=splitter)
     )
 
+clubs = []
+selfs = []
 for d in docs:
     lines = d.page_content.splitlines()
     if "-" in lines[0] : 
         d.metadata['영역'] = lines[0].split("-")[1].strip()
     if d.metadata['source'] == '동아리(자율)누가기록.txt' :
         d.metadata['종류'] = '동아리'
+        clubs.append(d.metadata['영역'])
 
     elif d.metadata['source'] == '창체(자율)누가기록.txt' : 
         d.metadata['종류'] = '자율'
+        selfs.append(d.metadata['영역'])
 
     else :
         d.metadata['종류'] = '진로'
 
+clubs = set(clubs)
+selfs = set(selfs)
+print(clubs, selfs)
+
 persist_db = Chroma.from_documents(
     docs, OpenAIEmbeddings(), persist_directory=DB_PATH, collection_name="extra_record"
+)
+
+####--------- Upload 유치원 특성
+
+loaders = [
+    TextLoader("txt/preschool_trait_examples.txt")
+]
+
+splitter = RecursiveCharacterTextSplitter(
+    chunk_size = 50,
+    chunk_overlap = 0,
+    keep_separator = True,
+    separators=["-"],  # 정규표현식 포함
+    is_separator_regex=True,  # 정규표현식 사용 가능하도록 설정
+)
+
+
+docs =[]
+for loader in loaders :
+    docs.extend(
+        loader.load_and_split(text_splitter=splitter)
+    )
+
+for d in docs:
+    lines = d.page_content.splitlines()
+    d.metadata['나이'] = lines[0].split(" ")[0][1:]
+    d.metadata['영역'] = lines[0].split(" ")[1]
+    d.metadata['수준'] = lines[0].split(" ")[2]
+    print(d)
+
+
+
+persist_db = Chroma.from_documents(
+    docs, OpenAIEmbeddings(), persist_directory=DB_PATH, collection_name="preschool_trait"
 )

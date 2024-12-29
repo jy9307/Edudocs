@@ -5,18 +5,26 @@ from app.set_prompt import extra_record_prompt, career_prompt
 from langchain_openai import ChatOpenAI
 from langchain_core.output_parsers import StrOutputParser
 from tools.db_manage import send_generate_result_to_firestore, send_stats_to_firestore
+import asyncio
+import requests
+
+async def generate_chain(input_data, chain):
+    """비동기 체인 호출"""
+    
+    return await chain.ainvoke(input_data)
 
 mh = MessageHandler()
 
 llm = ChatOpenAI(
     temperature=0.5,
     model='gpt-4o-mini',
-    streaming= True,
-    callbacks=[
-        ChatCallbackHandler(mh,"extra_record") ],
+    # streaming= True,
+    # callbacks=[
+    #     ChatCallbackHandler(mh,"extra_record") ],
 )
 
 docs = load_Document().Chroma_select_document("extra_record")
+
 
 if "extra_record_messages" not in st.session_state:
     st.session_state["extra_record_messages"] = []
@@ -57,23 +65,32 @@ with tab1 :
 
             area = ', '.join(selections)
 
-            st.markdown("### 생성된 누가기록 : ")
-            chain = (
-            extra_record_prompt
-            | llm
-            | StrOutputParser()
-            )
-
-
+            # chain = (
+            # extra_record_prompt
+            # | llm
+            # | StrOutputParser()
+            # )
             with st.container(border=True) :
-                chain.invoke({
-                "area" : area,
-                "u_area" : unregistered_area,
-                "examples" : examples,
-            })
-            send_stats_to_firestore("extra_record_self")
-            if 'auth' in st.session_state :
-                send_generate_result_to_firestore("창체 누가기록",10, st.session_state["extra_record_messages"][-1]['message'])
+                with st.spinner("대답을 생성중입니다! 잠시만 기다려주세요...."):
+                    response_data = requests.post("http://127.0.0.1:8000//ExtraSelfProcess", json={
+                        "area" : area,
+                        "u_area" : unregistered_area,
+                        "examples" : examples,
+                    })
+                    result = response_data.json()
+                    st.markdown("### 생성된 누가기록")
+                    st.write(result['result'])
+
+                    # result = asyncio.run(generate_chain({
+                    #     "area" : area,
+                    #     "u_area" : unregistered_area,
+                    #     "examples" : examples,
+                    # }, chain))
+
+                
+            # send_stats_to_firestore("extra_record_self")
+            # if 'auth' in st.session_state :
+            #     send_generate_result_to_firestore("창체 누가기록",0, st.session_state["extra_record_messages"][-1]['message'])
                 
         
         else :
@@ -114,14 +131,18 @@ with tab2 :
 
 
             with st.container(border=True) :
-                chain.invoke({
-                "u_area" : unregistered_area,
-                "area" : area,
-                "examples" : examples,
-            })
-            send_stats_to_firestore("extra_record_club")
-            if 'auth' in st.session_state :
-                send_generate_result_to_firestore("창체 누가기록",10, st.session_state["extra_record_messages"][-1]['message'])
+                with st.spinner("대답을 생성중입니다! 잠시만 기다려주세요...."):
+                    response_data = requests.post("http://127.0.0.1:8000//ExtraSelfProcess", json={
+                        "area" : area,
+                        "u_area" : unregistered_area,
+                        "examples" : examples,
+                    })
+                    result = response_data.json()
+                    st.markdown("### 생성된 누가기록")
+                    st.write(result['result'])
+            # send_stats_to_firestore("extra_record_club")
+            # if 'auth' in st.session_state :
+            #     send_generate_result_to_firestore("창체 누가기록",10, st.session_state["extra_record_messages"][-1]['message'])
         else :
             st.warning("과목과 세부 영역(활동)을 먼저 선택해주세요.")
 
@@ -136,23 +157,24 @@ with tab3 :
 
             examples = []
             examples.append(docs.get(where={"종류" : "진로"})['documents'][0])
-            area = ', '.join(selections)
+            examples = ', '.join(examples)
 
-            st.markdown("### 생성된 누가기록 : ")
-            chain = (
-            career_prompt
-            | llm
-            | StrOutputParser()
-            )
+            with st.spinner("대답을 생성중입니다! 잠시만 기다려주세요...."):
+                response_data = requests.post("http://127.0.0.1:8000/ExtraCareerProcess", json={
+                    "activities" : activities,
+                    "examples" : examples,
+                })
+                result = response_data.json()
+                st.markdown("### 생성된 누가기록")
+                st.write(result['result'])
 
-
-            with st.container(border=True) :
-                chain.invoke({
-                "activities" : activities,
-                "examples" : examples,
-            })
-            send_stats_to_firestore("extra_record_career")
-            if 'auth' in st.session_state :
-                send_generate_result_to_firestore("창체 누가기록",10, st.session_state["extra_record_messages"][-1]['message'])
+            # with st.container(border=True) :
+            #     chain.invoke({
+            #     "activities" : activities,
+            #     "examples" : examples,
+            # })
+            # send_stats_to_firestore("extra_record_career")
+            # if 'auth' in st.session_state :
+            #     send_generate_result_to_firestore("창체 누가기록",10, st.session_state["extra_record_messages"][-1]['message'])
         else :
             st.warning("활동을 먼저 적어주세요.")
