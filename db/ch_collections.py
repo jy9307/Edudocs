@@ -10,7 +10,7 @@ DB_PATH = "./chroma_db"
 persist_db = Chroma(
     persist_directory=DB_PATH,
     embedding_function=OpenAIEmbeddings(),
-    collection_name="work_law",
+    collection_name="preschool_trait",
 )
 
-print(persist_db.similarity_search("휴직"))
+persist_db.delete_collection()

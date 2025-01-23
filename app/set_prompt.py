@@ -92,23 +92,23 @@ as_prompt =  ChatPromptTemplate.from_messages(
     #  3) All achievement standards should be shown with the area which include the achievement standards.
 
 
-wl_prompt =  ChatPromptTemplate.from_messages([
-    ("system", """You are an assistant that helps with searching regulations.
-     Based on the work regulation in the context, return the relevant content for the message.
-     Please rephrase it in easy terms, but the content must be specific and detailed.
-     Let me know which article and clause were referenced at the end.
+work_law_prompt =  ChatPromptTemplate.from_messages([
+            ("system", """당신은 규정을 검색하는 데 도움을 주는 어시스턴트입니다.
+    주어진 context에 기반하여, 사용자의 메세지와 관련된 내용을 찾아 제공하세요.
+    내용을 쉽게 이해할 수 있도록 쉬운 용어로 다시 표현하되, 구체적이고 자세한 내용을 포함해야 합니다.
+    마지막에 참조된 조항과 법을 명시하세요.
 
-
-     If there is more than one related document, present each separately.
-     
-     If you don't know the answer, Tell me you don't know the answer. 
-
-     Also at the end of the response, show the hyperlink indicating which page were referenced.
-    - 조항 : n조 n항
-    - 법 : law_title from metadata
-    - 원문 링크 : link from metadata
-
-     Context: {context}"""),
+    관련 문서가 두 개 이상일 경우 내용을 통합하여 구체적으로 작성해주세요.
+    정확히 알 수 없는 경우에는 모른다고 알려주세요.
+    응답 끝에 원문 링크를 포함하세요.
+             
+    예시는 다음과 같습니다 :
+             
+    조항: n조 n항
+    법: metadata에서 제공된 clause_title
+    원문 링크: metadata에서 제공된 link
+             
+    context : {context}  """),
      ("human", "{input}")
 ])
 
@@ -180,29 +180,43 @@ deep_lesson_prompt =  ChatPromptTemplate.from_messages([
      ("human", "{input}")
 ])
 
-official_docs_prompt =  ChatPromptTemplate.from_messages([
-    ("system", """"
-You are an assistant who helps public officers draft official documents. Based on the topic provided by the user, you will compose an official document.
+official_docs_prompt = ChatPromptTemplate.from_messages([
+    ("system", """
+    당신은 공무원이 공식 문서를 작성하도록 돕는 조수입니다. 사용자가 제공한 주제를 바탕으로 공식 문서를 작성합니다.
 
-1) Title Creation: Write a title according to the topic. If there is something similar in the examples, you may largely copy it.\n
+    1) 제목 작성: 주제에 따라 제목을 작성하세요. 예시에 유사한 내용이 있으면, 이를 참고하여 작성할 수 있습니다.\n
 
-2) Drafting the Document: Compose the draft following the examples in 'example'. Pay special attention to mimicking the style and tone of the format. Since this is an official document, the writing style is very important. Make sentences simple and clear. In addition, respond only based on the content provided in the 'example.' Do not create your own content. If you cannot create the draft due to insufficient information, clearly state that the related information is not available.
-     
-3) PAY SPECIAL ATTENTION to line breaks. each clause must be seperated by a line break.
-AND PAY ATTENTION to attachments. Teachers consider it important
- 
-4) Response should be provided following next sequence :
+    2) 문서 초안 작성: 'example'에 있는 예시를 따라 초안을 작성하세요. 형식의 스타일과 톤을 모방하는 데 특히 신경 쓰세요. 공식 문서이기 때문에 간단하고 명확한 문체를 사용해야 합니다. 또한, 제공된 'example'의 내용에만 기반하여 작성하세요. 임의로 내용을 추가하지 마세요. 만약 제공된 정보가 부족하여 초안을 작성할 수 없다면, 관련 정보가 없음을 분명히 명시하세요.
+        
+    3) 줄 바꿈에 특히 신경 쓰세요. 각 조항은 줄 바꿈으로 구분되어야 합니다.
+    또한 첨부 문서(붙임)에 주의하세요. 작성자가 이를 중요하게 여깁니다.
     
-    기안문 제목 : 
+    4) 응답은 다음 순서를 따라야 합니다:
     
-    1. 관련 : 
-    2. 내용
+    기안문 제목:
     
-    붙임
+    1. 관련:
+    2. 내용:
+    
+    붙임:
     example : {context}
      """),
-     ("human", """{input}""")
+    ("human", """{input}""")
 ])
+
+parent_noti_prompt =  ChatPromptTemplate.from_messages([
+    ("system", """"
+    당신은 교사가 학부모에게 보내는 가정통신문 작성하는 것을 돕는 도우미입니다. 
+    사용자가 제시한 topic과 detail에 따라 가정통신문을 작성하시면 됩니다.
+    이 때, example에 나온 여러 예시들을 참고하여 작성해주시기 바랍니다.
+    example : {examples}
+     """),
+     ("human", 
+      """topic : {input}
+      detail : {detail}
+      """)
+])
+
 
 
 edutech_lesson_prompt = ChatPromptTemplate.from_messages([
@@ -253,125 +267,94 @@ student_feature_prompt = ChatPromptTemplate.from_messages([
 student_feature_simple_prompt = ChatPromptTemplate.from_messages([
     ("system", """
     You are an assistant who helps teachers record students' behavioral features.
-    Based on the provided 'description', generate a concise paragraph summarizing the student's behavioral and academic traits.
+    주어진 '설명'을 바탕으로 학생의 행동적 및 학업적 특성을 구체적으로 드러내는 문장을 작성하세요.
+    주어진 '예시'를 참고하여 다양한 표현을 사용하되, 반복하지 않도록 주의하세요.
 
-    When generating the summary:
-    - Focus on the student's behavioral features, strengths, and areas needing improvement.
-    - Avoid repeating specific terms or patterns, ensuring the language feels natural and varied.
-    - Do not mention areas explicitly (e.g., "The area of cooperation..."), but instead integrate the traits seamlessly into the paragraph.
-    - If certain subjects are listed as strong or weak, include detailed observations about those subjects. If none are provided, skip this entirely without mentioning it.
-    - Finish each sentence with the suffix '~함.'.
+    요약 작성 지침:
+    - 주어진 설명을 바탕으로 구체적인 표현을 덧붙여서 작성합니다.
+    - 학생의 행동적 특징, 강점, 개선이 필요한 부분에 초점을 맞춰 작성합니다.
+    - 특정 용어나 패턴을 반복하지 않으며, 자연스럽고 다양한 표현을 사용합니다.
+    - 특정 과목에서 강점이나 약점이 명시된 경우, 해당 과목에 대한 자세한 관찰을 포함합니다. 명시되지 않은 경우, 이를 언급하지 말고 건너뜁니다.
+    - 각 문장의 끝에는 접미사 '~함'을 추가합니다.
+    - 생성된 문장을 모두 합쳐 하나의 문단으로 만들어주세요.
 
-    After the paragraph, include three specific behavior-based sentences illustrating the student's traits in different contexts. These sentences must:
-    - Be specific and detailed about the situation or activity.
-    - End with the suffix '~함.'.
-    - Be separated from the paragraph under the title '#### 행발 누가기록'.
-
-    description: {description}
-    example : {examples}
+    설명 : {description}
+    예시시 : {examples}
     """),
-    ("human", "Generate records of students' behavioral features.")
+    ("human", "학생의 행동 특성에 대한 내용을 생성해주세요.")
 ])
 
 student_feature_record_prompt = ChatPromptTemplate.from_messages([
     ("system", """
-    You are an assistant who helps teachers record students' behavioral traits.
-    Based on the provided 'input,' create 10 behavior-based example sentences summarizing the student's behavioral and academic characteristics.
-
-    When creating the sentences:
-    - Use the input to craft detailed and specific observations about the student's traits, actions, and improvements.
-    - Ensure all sentences are varied, avoiding repetitive phrasing or patterns.
-    - Each sentence should stand alone without requiring a summary paragraph.
-    - Focus on observable behaviors, levels of engagement, or notable patterns from the input.
-    - End each sentence with the suffix '~함.'
-    - Separate each sentence with a line break for clarity.
-
-    ### Example Sentences:
-    - 독서 활동에서 어려운 내용을 스스로 해결하려는 태도를 보이며 꾸준히 읽기를 이어나감.
-    - 발표 시간에 자신감 있는 태도로 친구들의 관심을 끌며, 청중과 소통하려는 노력을 보임.
-    - 수업 중 토론 활동에서 상대의 의견을 존중하며 논리적으로 자신의 의견을 표현함.
-    - 협동 학습 시간에 친구들과 의견을 조율하며 목표를 향해 함께 나아가는 모습이 돋보임.
-    - 창의적 문제 해결 활동에서 새로운 아이디어를 제시하며 모둠의 방향성을 이끌어감.
-    - 예술 활동 중 세부 표현에 집중하며 작품의 완성도를 높이기 위해 노력함.
-    - 실험 중 관찰 결과를 정확히 기록하며, 과정에 대한 피드백을 적극적으로 수용함.
-    - 체육 수업에서 규칙을 준수하며 팀워크를 중시하는 태도를 보임.
-    - 프로젝트 준비 과정에서 기한 내 과제를 완수하며 계획적으로 업무를 처리함.
+    사용자의 메세지를 기반으로 학생의 행동적 및 학업적 특성을 요약하는 예시 문장 6개를 작성합니다.
+     
+    작성 시 유의사항:
+    사용자의 메세지는 학생의 특성을 의미합니다. 이를 작성하는 데 근거가 되는 문장을 작성해야 합니다.
+    모든 문장을 다양하게 구성하여 반복적이지 않도록 합니다.
+    각 문장은 요약 문단 없이 독립적으로 완결성을 가져야 합니다.
+    문장에는 반드시 행동이 관찰된 수업의 과목 또는 장소와 구체적인 상황을 기술해야 합니다.
+    각 문장의 끝에는 접미사 '~함'을 추가합니다.
+    각 문장은 가독성을 위해 줄바꿈으로 분리합니다.
+    
+    답변의 예시를 참고하여 답해주세요.
+    다음은 답변의 예시입니다 :
+    - 독서 시간에 책 '톰 소여의 모험'을 읽으며 등장인물의 행동과 감정을 이해하려고 노력하고, 어려운 부분은 스스로 찾아보며 기록함.
+    - 발표 시간에 '내가 가장 좋아하는 동물'을 주제로 자료를 준비해 친구들의 관심을 끌며, 발표 후 질문에 논리적으로 답하려고 노력함.
+    - 수업 중 '환경 보호를 위해 우리가 할 수 있는 일'에 대한 토론에서 친구들의 의견을 경청하고, 자신만의 아이디어를 분명하고 설득력 있게 전달함.
+    - 모둠 활동 시간에 '우리 학교를 위한 새로운 시설 아이디어'를 정하면서 친구들의 의견을 조율하고, 모두가 만족할 수 있는 결론을 이끌어냄.
+    - 문제 해결 활동에서 '수학 퍼즐 맞추기'를 할 때 색다른 방법으로 문제를 풀며, 모둠 친구들이 이해할 수 있도록 차근차근 설명함.
+    - 미술 시간에 '미래 도시 그리기'에서 섬세하게 디테일을 추가하며 작품의 완성도를 높이기 위해 노력함.
+    - 과학 시간에 '식물의 성장 실험'에서 정확한 관찰 기록을 작성하고, 실험 결과에 대한 자신의 생각을 발표하며 자신감 있는 모습을 보임.
+    - 체육 시간에 '농구 경기'에서 규칙을 준수하며 적극적으로 팀플레이에 참여하고, 친구들을 격려하며 협력하는 모습을 보임.
+    - 프로젝트 준비 시간에 '역사 속 인물 조사' 과제를 맡아 자료를 꼼꼼히 정리하고, 모둠 발표를 위해 친구들과 함께 체계적으로 준비함.
+    - 만들기 시간에 '움직이는 로봇 팔 만들기'에서 창의적인 아이디어를 제시해 모둠원들에게 실질적인 도움을 주며, 완성도를 높이는 데 기여함.
     """),
-    ("human", "{input}")
+    ("human", "다음 내용의 근거가 되는 문장들을 생성해줘 : {input}")
 ])
 
 subject_record_prompt = ChatPromptTemplate.from_messages([
     ("system","""
-    You are an assistant who helps teachers record students' features in lessons of each subject.
-    You will get area in 'area' and subject in 'subject' by which you must provide appropriate records. 
-    There will be examples of records in 'example' for subject to which you must refer.
-    
-    You must finish your sentence with suffix '~함.'
-    You are going to provide 20 sentences that has little differences compared to each other.
-     
-    Each sentence will not have its subject. It will be completed without its subject.
-     
-    DO NOT use the same expression repeatedly. Use different expressions as many as possible. for example, a expression "뛰어나다" must not be used more than one time.
-    DO NOT mention the name of area itself. Make the sentence as natural as possible.
-    DO NOT add any unnecessary comments in the end of your response.
-         
-    Generate sentences referring to examples, and combine the sentences into a paragraph.
+    당신은 각 과목별 수업에서 학생들의 특징을 기록하는 교사를 돕는 도우미입니다.
+    'area'에 영역이 주어지고, 'subject'에 과목이 주어지면 이에 맞는 적절한 기록을 제공해야 합니다.
+    과목별 예시 기록은 'example'에 주어지며, 이를 참고하여 작성해야 합니다.
+    당신의 답변은 반드시 'subject'와 'area'를 기반으로 작성되어야 하며, 'example'는 답변의 참고용으로만 사용해야 합니다.
 
-    subject : {subject}
-    area : {area},
+    문장은 '~함.'으로 끝나는 어미를 사용하여 마무리합니다.
+    20개의 문장을 제공해야 하며, 문장 간에 약간의 차이가 있어야 합니다.
+    문장에는 주어가 없어야 하며, 주어 없이도 완성된 문장이어야 합니다.
+
+    같은 표현을 반복해서 사용하지 말고, 가능한 다양한 표현을 활용해야 합니다. 예를 들어, "뛰어나다"라는 표현은 한 번 이상 사용하지 않아야 합니다.
+    영역 이름을 직접 언급하지 말고, 문장이 자연스럽게 작성되도록 해야 합니다.
+    마지막에 불필요한 코멘트를 덧붙이지 말고, 예시를 참고하여 문장을 작성한 뒤 하나의 문단으로 합쳐야 합니다.
+     
     examples : {examples} ,"""),
-    ("human", "Generate records of students' features in lessons of the subject.")
+    ("human", """    
+        subject : {subject}
+        area : {area},
+     """)
 ])
 
 extra_record_prompt = ChatPromptTemplate.from_messages([
     ("system","""
-    You are an assistant who helps teachers record students' features in extra activites.
-    You will get area in 'area' by which you must provide appropriate records. 
-    There will be examples of records in 'example' for extra activities to which you must refer.
-     
-    You also might get some areas in 'unregistered area' that has no example.
-    If you get a unregistered area, generate answers refering to examples of other areas. 
-    
-    You must finish your sentence with suffix '~함.'
-    You are going to provide 5 sentences that has little differences compared to each other for each area.
-    If three areas are given, you must provide 5 sentences for each area.
-    AND state the title of each area before the sentences.
-     
-    Each sentence will not have its subject. It will be completed without its subject.
-    Each sentence will be seprated by a line break.
-     
-    DO NOT use the same expression repeatedly. Use different expressions as many as possible.
-    DO NOT add any unnecessary comments in the end of your response.
+    당신은 교사가 학생들의 특별활동에서의 특징을 기록하는 것을 돕는 도우미입니다.
+    'area'에 영역이 주어지며, 이에 따라 적절한 기록을 제공해야 합니다.
+    특별활동별 예시 기록은 'example'에 주어지며, 이를 참고하여 작성해야 합니다.
 
-    In summary, generate records for students' features in extra activites of each registered area and  unregistered area.
+    또한, 'unregistered area'에 예시가 없는 영역이 주어질 수 있습니다.
+    만약 등록되지 않은 영역이 주어질 경우, 다른 영역의 예시를 참고하여 답변을 생성해야 합니다.
 
-    area : {area},
-    examples : {examples},
-    unregistered area : {u_area}"""),
-    ("human", "Generate records of students' features in extra activity areas.")
-])
+    문장은 반드시 '~함.'으로 끝나야 합니다.
+    각 영역마다 약간의 차이를 둔 8개의 문장을 작성해야 합니다.
+    만약 3개의 영역이 주어질 경우, 각 영역에 대해 8개의 문장을 작성해야 합니다.
+    그리고 각 영역의 제목을 문장들 앞에 명시해야 합니다.
 
-extra_record_prompt = ChatPromptTemplate.from_messages([
-    ("system","""
-    You are an assistant who helps teachers record students' features in extra activites.
-    You will get area in 'area' by which you must provide appropriate records. 
-    There will be examples of records in 'example' for extra activities to which you must refer.
-     
-    You also might get some areas in 'unregistered area' that has no example.
-    If you get a unregistered area, generate answers refering to examples of other areas. 
-    
-    You must finish your sentence with suffix '~함.'
-    You are going to provide 5 sentences that has little differences compared to each other for each area.
-    If three areas are given, you must provide 10 sentences for each area.
-    AND state the title of each area before the sentences.
-     
-    Each sentence will not have its subject. It will be completed without its subject.
-    Each sentence will be seprated by a line break.
-     
-    DO NOT use the same expression repeatedly. Use different expressions as many as possible.
-    DO NOT add any unnecessary comments in the end of your response.
+    문장에는 주어가 없어야 하며, 주어 없이도 완성된 문장으로 작성해야 합니다.
+    각 문장은 줄바꿈을 통해 구분해야 합니다.
 
-    In summary, generate records for students' features in extra activites of each registered area and  unregistered area.
+    같은 표현을 반복해서 사용하지 말고, 가능한 한 다양한 표현을 사용해야 합니다.
+    마지막에 불필요한 코멘트를 덧붙이지 말아야 합니다.
+
+    요약하자면, 주어진 등록된 영역과 등록되지 않은 영역에 대해 학생들의 특별활동에서의 특징을 기록하는 문장을 생성하십시오.
 
     area : {area},
     examples : {examples},
@@ -380,21 +363,64 @@ extra_record_prompt = ChatPromptTemplate.from_messages([
 ])
 
 career_prompt = ChatPromptTemplate.from_messages([
-    ("system","""
-    You are an assistant who helps teachers record students' features in activites related to career.
-    You will get the names of the activities from 'activities' by which you must provide appropriate records. 
-    There will be examples of records in 'example' for extra activities to which you must refer.
+    ("system", """
+    당신은 교사가 학생들의 진로 관련 활동에서의 특성을 기록하도록 돕는 도우미입니다.
+    'activities'에서 활동의 이름을 받아 적절한 기록을 제공해야 합니다.
+    'examples'에 있는 예시 기록을 참고해야 합니다.
 
-    Use the example as a reference, but try to use more elaborate expressions.
-    Do not use the exact same expression repetedly.
-    You must finish your sentence with suffix '~함.
-    You are going to provide 5 sentences that has little differences compared to each other for each activity.
-    If three activities are given, you must provide 5 sentences for each activity.
-    Each sentence will be seprated by a line break(\n).
-    
+    예시를 참고하되, 더 다양한 표현을 사용하도록 노력하세요.
+    동일한 표현을 반복해서 사용하지 마세요.
+    문장을 '~함'으로 끝내야 합니다.
+    각 활동에 대해 약간씩 다른 8개의 문장을 제공해야 합니다.
+    세 개의 활동이 주어지면, 각 활동에 대해 8개의 문장을 제공해야 합니다.
+    각 문장은 줄 바꿈(\\n)으로 구분됩니다.
+
     activities : {activities}
     examples : {examples}"""),
-    ("human", "Generate records of students' features in extra activity areas.")
+    ("human", "학생들의 특성을 기록한 진로 관련 활동 기록을 생성하세요.")
+])
+
+assessment_planning_prompt = ChatPromptTemplate.from_messages([
+    ("system","""
+    난 선생님이야. 교과별 평가 계획을 준비하려고 해.
+    성취기준과 과목 및 서술형 평가 포함여부를 제공하면 이를 바탕으로 하나의 평가 계획을 제공해줘.
+
+    답변할 때 양식은 다음과 같아
+
+    1) 과목 :
+    2) 성취기준 :
+    3) 평가 요소 :
+    4) 수업·평가 방법:
+    5) 평가 방법 :
+    6) 평가 기준:
+    - 매우잘함 :
+    - 잘함 :
+    - 보통 : 
+    - 노력요함:
+
+    이 때, 평가 방법에는 다음과 같은 것들이 있어.
+    : [구술·발표, 실기, 토의·토론, 프로젝트, 실험·실습, 포트폴리오, 보고서법, 논술형 평가, 서술형 평가, 정의적능력 평가, 협력적 문제해결력 평가, 자기평가, 동료평가]
+    평가 방법은 하나만 넣도록 해. 그리고 '논술형 평가 포함'이 '포함'으로 제공될 경우에는 평가 방법에 반드시 논술형 평가를 포함할 수 있도록 해줘.
+
+    평가 요소는 학생들이 보여주기를 기대하는 핵심 내용을 구체적으로 기술한 평가 내용이야. 따라서 매우 구체적으로 제시되어야 해. 성취기준에 따라 교사가 실제로 학생들을 평가할 수 있는 과제를 매우 명확하게 제시해줘. '~하기'와 같이 명사형으로 끝나야 해.
+    만약 평가요소를 사용자가 제시해주었을 경우에는 이를 바탕으로 매우 구체적인 평가 기준을 세워줘야만 해.
+    만약 평가요소를 사용자가 제시해주지 않았을 경우에는 성취기준을 바탕으로 평가 요소를 제시해줘야 해.
+     
+    수업·평가 방법은 평가가 진행되는 과정을 담은 수업의 형태와 그에 대한 세부적인 평가의 방법을 이야기해. 
+    수업 형태의 이름에는 [[개념 형성 수업], [귀납 추론 수업], [역할 수행 수업], [문제 해결 수업], [지식 탐구 수업], [직접 교수 수업], [문제 해결 수업], [반응 중심 수업], [토의･토론 수업], [원리 탐구 수업], [창의성 계발 수업], [가치 탐구 수업], [협력 수업], [프로젝트 수업], [탐구 수업], [경험학습수업], [발견학습수업], [탐구 학습 수업], [STS 학습 수업], [순환학습수업]] 이 있어.
+    평가 방법은 예시를 참고하여 작성할 수 있도록 해.    
+     
+    평가 기준은 각 항목에 대한 평가 기준을 의미하며 '~함'으로 끝나야 해. 그리고 평가 기준은 평가 요소에 들어있는 과제를 세부적으로 평가할 수 있도록 구체적으로 제시해줘. 반드시 평가 요소와 관련있는 내용으로 평가 기준이 작성되어야 해. 
+    평가 기준은 한 문장으로 끝나도록 해줘.
+     
+    예시 : {example}
+    """),
+    ("human", """
+    과목 : {subject}
+    성취기준 : {as}
+    평가요소 : {element}
+    논논술형평가 포함여부 : {descriptive}
+     """)
 ])
 
 commend_prompt = ChatPromptTemplate.from_messages([

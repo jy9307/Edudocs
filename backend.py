@@ -4,10 +4,11 @@ from pydantic import BaseModel
 from typing import List, Dict
 from app.set_documents import load_Document
 from app.set_prompt import *
-from tools.hwp_parser import HWPExtractor
+import tools
 from langchain_openai import ChatOpenAI
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import ChatPromptTemplate
+from langchain.chains.query_constructor.base import AttributeInfo
 from io import BytesIO
 import pandas as pd
 import langchain
@@ -35,7 +36,7 @@ class SubjectData(BaseModel) :
     examples : str
 
 def get_text(file_obj):
-    extractor = HWPExtractor(file_obj)  # file_obj는 BytesIO
+    extractor = tools.HWPExtractor(file_obj)  # file_obj는 BytesIO
     return extractor.get_text()
 
 app = FastAPI()
@@ -199,6 +200,49 @@ async def process_data(data : dict):
     response = {"status": "success", "result": results}
     return response
 
+@app.post("/WorkLaw")
+async def process_data(data : dict):
+
+    query = data['query']
+
+    docs = load_Document().Chroma_select_document("work_law")
+
+    self_retriever = tools.LoadSelfQueryRetriever(docs, 0.5)
+
+    self_retriever.metadata_info([
+            AttributeInfo(
+        name="cluase_title",
+        description="""법률 항목의 이름입니다.
+        One of ['휴직', '특별연수', '조교의 임용', '승진', '휴가의 종류', '적용범위', '명예퇴직', '징계위원회의 설치', '근무시간 면제 시간의 사용', '인사위원회의 기능', '인사교류', '당직 및 비상근무', '목적', '연수기관 및 근무장소 외에서의 연수', '초빙교원', '연가계획 및 승인', '임용의 원칙', '교권의 존중과 신분보장', '보직 등 관리의 원칙', '벌칙', '대학의 장 등의 임기', '공립대학의 장 등의 임용', '시간외근무 및 공휴일 등 근무', '근무기강의 확립', '지방교육공무원 인사위원회', '연수와 교재비', '정년', '휴가기간 중의 토요일 또는 공휴일', '겸직 허가', '근무시간 등의 변경', '교장·교감 등의 자격', '영리 업무의 금지', '정의', '정치적 행위', '인사위원회의 설치', '교육감 소속 교육전문직원의 채용 및 전직 등', '특별휴가', '연가 일수', '보수결정의 원칙', '교수 등의 임용', '선서', '경력경쟁채용 등', '출장공무원', '국가공무원법과의 관계', '사실상 노무에 종사하는 공무원', '겸직 금지', '전직 등의 제한', '지방공무원법과의 관계', '병가', '교원의 불체포특권', '연수 실적 및 근무성적의 평정', '대학인사위원회', '휴직기간 등', '공립대학 교육공무원의 고충처리', '휴가기간의 초과', '연가 일수에서의 공제', '징계사유의 시효에 관한 특례', '보수에 관한 규정', '해직된 공무원의 근무', '장학관 등의 임용', '과태료', '교수 등의 자격', '연수의 기회균등', '인사기록', '겸임', '대학의 장의 임용', '공가', '교육전문직원의 자격', '고위공직자의 공무 외 국외여행', '우수 교육공무원 특별 승진', '승진후보자 명부', '친절ㆍ공정한 업무 처리', '지방교육전문직원 인사위원회', '교감ㆍ교사ㆍ장학사 등의 임용', '고충처리', '임용권의 위임 등', '강임자의 우선승진임용 제한', '파견근무', '교육연수기관에의 교원 배치', '근무시간 등', '신체검사', '연수기관의 설치', '교사의 신규채용 등', '징계의결의 요구', '교사의 자격', '교육감 소속 교육전문직원의 임용', '기간제교원', '현업 공무원 등의 근무시간과 근무일', '부총장ㆍ대학원장ㆍ단과대학장의 보직']""",
+        type='string'
+    ),
+    ])
+
+    self_retriever.docs_info("학교에서 근무하는 공무원(교원)이 지켜야 하는 법률을 담고 있습니다.")
+
+    retriever = self_retriever.retriever_load()
+
+    laws = retriever.batch([query])[0]
+
+    llm = ChatOpenAI(
+    temperature=0.5,
+    model='gpt-4o-mini',
+    verbose=False
+    ) 
+
+    chain = (
+    work_law_prompt
+    |llm
+    |StrOutputParser()
+    )
+
+    result = await chain.ainvoke({
+        "input" : query,
+        "context" : laws
+    })
+    response = {"status": "success", "result": result}
+    return response
+
 
 @app.post("/CommendDocs")
 async def process_data(    
@@ -232,11 +276,25 @@ async def process_data(
 
 @app.post("/OfficialDocs")
 async def process_data(data : dict):
-    print(data['activities'])
 
     docs = load_Document().Chroma_select_document("official_document")
 
-    examples = docs.get(where={"category" : data['category']})['documents'][0]
+    self_retriever = tools.LoadSelfQueryRetriever(docs, 0.5)
+
+    self_retriever.metadata_info([
+            AttributeInfo(
+        name="범주",
+        description="""공문의 범주입니다. 
+        One of ['현장체험학습','학업중단숙려제','학업성적관리위원회','교육과정','평가 도구', '학교생활기록부','방과후학교','학교운영위원회','학교폭력','학교회계','교외체험학습']""",
+        type='string'
+    ),
+    ])
+
+    self_retriever.docs_info("학교에서 공적 업무 처리를 위해 작성하는 공문의 예시")
+
+    retriever = self_retriever.retriever_load()
+
+    examples = retriever.batch([data['topic']])[0]
     print(examples)
 
     llm = ChatOpenAI(
@@ -256,6 +314,50 @@ async def process_data(data : dict):
     result = await chain.ainvoke({
         "input" : data['topic'],
         "context" : examples
+    })
+    response = {"status": "success", "result": result}
+    return response
+
+@app.post("/ParentNoti")
+async def process_data(data : dict):
+
+    docs = load_Document().Chroma_select_document("parent_notification")
+
+    self_retriever = tools.LoadSelfQueryRetriever(docs, 0.5)
+
+    self_retriever.metadata_info([
+            AttributeInfo(
+        name="범주",
+        description="""가정통신문의 범주입니다. 
+        One of ['교육과정 운영','방과후학교, 돌봄교실, 늘봄교실 등', '현장체험학습', '통학버스', '보건, 건강 등', '학교폭력, 안전, 정보 등', '기타']""",
+        type='string'
+    ),
+    ])
+
+    self_retriever.docs_info("학교에서 가정으로 보내는 가정통신문 예시 문서")
+
+    retriever = self_retriever.retriever_load()
+
+    examples = retriever.batch([data['topic']])[0]
+
+    llm = ChatOpenAI(
+    temperature=0.5,
+    model='gpt-4o-mini',
+    verbose=False
+    ) 
+
+    chain = (
+    parent_noti_prompt
+    |llm
+    |StrOutputParser()
+    )
+
+    print("가통 생성기 주제 : ",data['topic'])
+
+    result = await chain.ainvoke({
+        "input" : data['topic'],
+        "detail" : data['detail'],
+        "examples" : examples
     })
     response = {"status": "success", "result": result}
     return response
@@ -280,6 +382,7 @@ async def process_data(data : dict):
     |llm
     |StrOutputParser()
     )
+    
     # 비동기 처리 (예: 데이터 처리 시뮬레이션)
     result = await chain.ainvoke({
         "subject" : data['subject'],
@@ -477,14 +580,51 @@ async def process_data(data : dict):
     return response
 
 
+@app.post("/AssessmentPlanning")
+async def process_data(data : dict):
+    
+    docs = load_Document().Chroma_select_document("assessment_planning")
+
+    examples = docs.as_retriever().batch([data['as']])[0]
+
+    achievement_standard = data['as']
+    element = '평가요소도 함께 생성해주세요.' if data['element'] == '' else data['element']
+    subject= data['subject']
+    descriptive = data['descriptive_assessment']
+
+    llm = ChatOpenAI(
+    temperature=0.5,
+    model='gpt-4o-mini',
+    verbose=False
+    )
+
+    chain = (
+    assessment_planning_prompt
+    |llm
+    |StrOutputParser()
+    )
+
+    result = await chain.ainvoke({
+        "example" : examples,
+        "subject" : subject,
+        "element" : element,
+        "as" : achievement_standard,
+        "descriptive" : descriptive
+    })
+
+    response = {"status": "success", "result": result}
+    return response
+
+
 @app.post("/PreschoolTrait")
 async def process_data(data : dict):
-    print(data)
+
 
     docs = load_Document().Chroma_select_document("preschool_trait")
 
     age = data['age'].strip()
-    arealevel_dict = json.loads(data['arealevel'])
+    arealevel_dict = data['arealevel']
+
 
     examples = []
     traits = []  
@@ -497,6 +637,8 @@ async def process_data(data : dict):
                         {"수준": {"$eq": level}}
                     ]
                 }
+        
+        print(filter_criteria)
         examples.append(docs.get(where=filter_criteria)['documents'][0])
     traits = '\n'.join(traits)
     examples = ', '.join(examples)
@@ -521,4 +663,3 @@ async def process_data(data : dict):
     })
     response = {"status": "success", "result": result}
     return response
-

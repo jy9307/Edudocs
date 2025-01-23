@@ -12,5 +12,3 @@ from langchain_chroma import Chroma
 # 저장할 경로 지정
 DB_PATH = "./chroma_db"
 
-
-
