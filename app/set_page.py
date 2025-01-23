@@ -4,6 +4,8 @@ from langchain_core.runnables import RunnablePassthrough
 from langchain_core.output_parsers import StrOutputParser
 from langchain.callbacks.base import BaseCallbackHandler
 from app.set_documents import load_Document
+from tools.db_manage import send_generate_result_to_firestore, send_stats_to_firestore
+import asyncio
 
 class MessageHandler() :
     def __init__(self) :
@@ -63,9 +65,11 @@ class BasicChatbotPageTemplate() :
             )
 
     def set_title(self, title, emoji) :
+        self.title = title
         st.set_page_config(
             page_title=title,
             page_icon=emoji,
+            layout='wide'
         )
 
         st.title(title)
@@ -88,7 +92,7 @@ class BasicChatbotPageTemplate() :
             chain = (
                 {
                 "context" : docs.Chroma_select_document(self.page_name).as_retriever(search_type=search_type,
-                                                                search_kwargs={'k':6}),
+                                                                search_kwargs={'k':4}),
                 "input" : RunnablePassthrough()
                 }
                 | prompt_name
@@ -97,6 +101,10 @@ class BasicChatbotPageTemplate() :
             )
             with st.chat_message("ai"):
                 chain.invoke(message)
+                # send_stats_to_firestore(self.page_name)
+                # if 'auth' in st.session_state :
+                #     send_generate_result_to_firestore(self.title, 0, result=st.session_state[self.message_cache_name][-1]['message'])
+                
         
     def set_chat_ui_with_retriever(self,
                                    prompt_name,
@@ -120,6 +128,7 @@ class BasicChatbotPageTemplate() :
                 | self.llm
                 | StrOutputParser()
             )
+            send_stats_to_firestore(self.page_name)
             with st.chat_message("ai"):
                 chain.invoke(message)
 
@@ -138,9 +147,11 @@ class BasicInputBoxPageTemplate() :
         self.mh = mh_instance
 
     def set_title(self, title, emoji) :
+        self.title = title
         st.set_page_config(
             page_title=title,
             page_icon=emoji,
+            layout="wide"
         )
 
         st.title(title)
@@ -176,4 +187,7 @@ class BasicInputBoxPageTemplate() :
                 **variables,
                 "input" : input
                 })
+            send_stats_to_firestore(self.page_name)
+            if 'auth' in st.session_state :
+                send_generate_result_to_firestore(self.title, 0, result=st.session_state[self.message_cache_name][-1]['message'])
         return
