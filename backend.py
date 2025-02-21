@@ -1141,6 +1141,8 @@ async def process_data(data : dict):
         "descriptive" : descriptive
     })
 
+    print(result)
+
     response = {"status": "success", "result": result}
     return response
 

@@ -217,6 +217,20 @@ parent_noti_prompt =  ChatPromptTemplate.from_messages([
       """)
 ])
 
+safety_phrase_prompt =  ChatPromptTemplate.from_messages([
+    ("system", """"
+    당신은 교사가 학생들에게 안전 교육에 사용할 문구를 만드는 것을 돕는 도우미입니다.
+    사용자가 제시한 area과 detail에 따라 문구를 6개 정도 작성해주세요.
+    이 때, example에 나온 여러 예시들을 참고하여 작성해주시기 바랍니다.
+    참고만 하되, 똑같은 문구는 쓰지 말고 최대한 다양하고 구체적인 말들을 만들어내시기 바랍니다.
+    example : {examples}
+     """),
+     ("human", 
+      """area : {area}
+      detail : {detail}
+      """)
+])
+
 
 
 edutech_lesson_prompt = ChatPromptTemplate.from_messages([
@@ -425,32 +439,34 @@ assessment_planning_prompt = ChatPromptTemplate.from_messages([
 
 commend_prompt = ChatPromptTemplate.from_messages([
     ("system", """
-    You are an assistant who helps teachers write down their own commendation documents.
-    The user will provide their outcomes seperated by comma.
-    You need to generate a complete document divided by two parts refering to the outcomes the user provide. 
+    당신은 교사들이 자신의 공적 문서를 작성할 수 있도록 돕는 도우미입니다.
+    사용자가 자신이 운영한 활동들을 쉼표로 구분하여 제공할 것입니다.
+    제공된 결과를 바탕으로 두 부분으로 나누어진 완성된 문서를 작성해야 합니다.
 
-    Title of Part one would be "### 공적 요지".
-    It is one sentence with able to explain the user's activities.
-    A sentence should be based on the six Ws and one H principle.
-    Most of all, it must include the time period which is usually from March to November.
-    Sentences of part one should be finished with "~에 기여함."
+    첫 번째 부분의 제목은 "### 공적 요지"입니다.
+    이 부분은 교사의 활동을 설명할 수 있는 한 문장으로 구성됩니다.
+    문장은 육하원칙(누가, 무엇을, 언제, 어디서, 왜, 어떻게)에 기반해야 합니다.
+    무엇보다도, 3월부터 11월까지의 기간을 반드시 포함해야 합니다.
+    첫 번째 부분의 문장은 "~에 기여함."으로 끝나야 합니다.
+
+    두 번째 부분의 제목은 "### 공적 내용"입니다.
+    이 부분은 구체적인 결과물을 포함합니다.
+    이 부분의 문장은 평가 기준에 부합해야 합니다.
+    평가 기준은 다음과 같습니다: {criteria}
+    중요!!!!! 평가기준을 참고해서 높은 점수를 받을 수 있도록 작성해주세요.
     
-    Title of Part one would be "### 공적 내용".
-    It will include a concrete version of the outcomes.
-    Sentences of this part must align with the assessment criteria.
-    The assessment criteria are as follows : {criteria}
-    Use the provided activity names as the titles for each section with numbers. 
-    For each section, expand and elaborate on the details as much as possible, including the target audience, time period, what was done, and how it was accomplished. Each sentence should be separated by a line break.
-    Be especially detailed and specific about the operational methods using all the knowledge you have.
-    Referencing the criteria will make it even better. Ensure that each sentence ends with the '~함' ending.
-     
-    You need to pay special attention to line breaks.     
-    Each part must begin with the title of it.
+    제공된 활동명을 각 항목의 제목으로 하여 번호를 붙여 사용합니다.
+    각 항목마다 대상, 기간, 수행한 내용, 그리고 어떻게 수행했는지 등 세부 사항을 가능한 한 구체적으로 확장하고 상세하게 기술합니다.
+    각 문장은 줄 바꿈으로 구분되어야 합니다.
+    운영 방법에 대해서는 당신이 가진 모든 지식을 활용하여 특히 상세하고 구체적으로 설명해야합니다. 거짓이 좀 섞여도 좋습니다.
+    모든 문장은 '~함'으로 끝나도록 작성합니다.
 
-    Example is as follows :
+    줄 바꿈에 특별히 신경 써야 합니다.
+
+    예시는 다음과 같습니다:
      
 ### 공적 요지
-2024년 3월부터 12월까지 수준 및 단계별로 체계화한 문서 및 동영상강의 온라인 원격 콘텐츠 개발 및 공유 활동으로 코로나 상황에서 교육활동에 기여함
+2025년 3월부터 12월까지 수준 및 단계별로 체계화한 문서 및 동영상강의 온라인 원격 콘텐츠 개발 및 공유 활동으로 코로나 상황에서 교육활동에 기여함
 
 ### 공적 내용     
 1. 코로나 19 상황 원격 콘텐츠 개발 및 개별 지도 개요
@@ -460,17 +476,9 @@ commend_prompt = ChatPromptTemplate.from_messages([
 ◦ 온라인 개학 과정 중 원격 콘텐츠 개발
 - 공식 온라인 개학으로 원격수업 진행 시 1학년 영어 교육과정 재구성한 동영상강의를 녹화 제작하여 학습 과정에 활용함
 - 수준 및 단계별로 체계화한 원격 콘텐츠를 학생들에게 제시하여 학습하도록 하고 오프라인 등교 수업 시 피드백을 통해 완전 학습이 되도록 도움
-- 동영상학습 과정은 문서자료와 함께 개인 블로그로 체계적으로 제시하여 학교 학생은 물론 누구라도 볼 수 있도록 공개해 둠
-- 동영상강의 코스 개인블로그 페이지
+
 
 2. 교육과정 재구성 콘텐츠 개발(자체 커리큘럼 구성) 및 무료 공개
-
-◦ 단계별 체계적 어휘 자료 개발
-- 1단계 : (최우선순위) 수능 필수 영단어 1300개
-- 2단계 : (collocation) 필수 영어어휘구 800개
-- 3단계 : (어근접사 활용) Rootfix Basic 660개(Basic) - 1036(Advanced) 
-- 4단계 : (우리말 해석보다 명쾌한) 영영풀이 기본어휘 180
-- 기타 : 210개 명문장으로 통째로 암기하는 어휘 590개, 알파벳순 주요 수능영어 어휘집 등
 
 ◦ 정확한 영어문장 해석을 체계화시키는 구문독해 자료 개발
 - 영어 명문장으로 구성하여 영어구문해석능력과 문학적 감성 및 인성교육까지 한꺼번에 잡을 수 있도록 함
@@ -485,19 +493,6 @@ commend_prompt = ChatPromptTemplate.from_messages([
 - 2017년 5월 이후 개인 블로그로 플랫폼을 바꾸어 2020년 10월 초 현재 1,450여 건의 자료를 탑재하여 누구라도 활용할 수 있도록 공개 운영 중
 - 교육과정 재구성한 영어자료, 수능영어, 실용영어, 학습법, 교육 및 독서노트, 소속 학교 자료실 등의 메뉴로 구성하여 운영
 
-◦ 동영상강의 콘텐츠 제작 및 공유
-
-- 축적된 문서 영어콘텐츠의 내용을 동영상강의로 제작하여 코로나 상황의 학교 온라인 수업으로 활용하면서 모두가 볼 수 있도록 무료로 공개함
-- 단계별, 수준별로 구성된 문서자료의 흐름을 따라 개별적 자기주도학습이 가능하도록 구성함
-- 단계별 동영상 강의 내용 
-◦ Flipped Learning 활용
-- 자체 제작한 동영상강의를 활용하여 온라인 기간 학습한 내용을 등교 개학 수업 시 피드백을 하면서 적극적인 학습을 유도함
-
-
-◦ 코로나 상황을 넘어서는 공교육 패러다임의 모델 제시
-- 기본부터 스스로 학습할 수 있도록 제작한 동영상강의 및 영어 멘토링 학습코칭 프로그램의 활용으로 자기주도학습과 그 과정에 필요한 유기적이고 체계적인 학습콘텐츠 제공이 동시에 이루어지는 큰 효과를 거둘 수 있었으며 코로나 상황 종료 후에도 공교육 살리기 프로젝트로 지속적 활용이 가능한 패러다임의 모델이 될 것으로 기대함
-
-
 
 4. 시공간 초월 교실 밖 학습코칭
 
@@ -507,10 +502,6 @@ commend_prompt = ChatPromptTemplate.from_messages([
 - 목표 : 자신의 수준에 맞게 꾸준히 학습 습관을 형성하기
 - 코칭방식 : 출발점 진단 후 방향 설정, 수시로 학습상담, 주 1회 점검
 - 점검내용 : 매일 학습하는 단어 및 구문독해
-
-- 온라인 장점 활용 : 시공간 초월 학습 점검 및 코칭 가능. 격려 편지나 학습자료 등 온라인상에 탑재 활용. 공통 학습교재 강의 수강희망자를 대상으로 자체 제작 동영상강의 무료 수강 기회 부여
-- 대면수업 기간에는 수준과 수요에 따른 현장 방과후수업으로 다양한 지도
-- 시간과 공간과 학생 수준을 가리지 않고 개별화 교육 가능함. 온라인, 전화, 대면 상담 등의 다양한 방법도 활용 가능
 
 - 1학기까지 첫 번째 시즌을 수료한 후 학생들의 학습 습관 형성, 기본부터 단계별 학습을 통해 개별화된 영어실력 향상, 영어 과목에 대한 자신감 고취 및 동기유발, 자기주도적 학습을 스스로 이뤄내는 뿌듯함 등의 소감을 전하였고, 현재 2학기 두 번째 시즌 멘토링을 90여 명의 학생들을 대상으로 계속 진행중
 
