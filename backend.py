@@ -1,18 +1,25 @@
-from fastapi import FastAPI, Form, File, UploadFile, WebSocket, WebSocketDisconnect, BackgroundTasks
+from fastapi import FastAPI, Form, File, UploadFile, WebSocket, WebSocketDisconnect
+from fastapi.responses import StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
+
 from pydantic import BaseModel
 from typing import List, Dict
+
 from app.set_documents import load_Document
 from app.set_prompt import *
 import tools
+
+from langchain.callbacks import AsyncIteratorCallbackHandler
 from langchain_openai import ChatOpenAI
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import ChatPromptTemplate
 from langchain.chains.query_constructor.base import AttributeInfo
+
 from io import BytesIO
 import pandas as pd
 import langchain
 import json
+import asyncio
 
 langchain.debug = False
 langchain.llm_cache = False
@@ -50,103 +57,82 @@ app.add_middleware(
     allow_headers=["*"],                     # 허용할 HTTP 헤더
 )
 
-connected_clients = set()
+# @app.post("/DescriptionFeedback")
+# async def process_data(data : dict):
+#     columns = data['target'][0]
+#     target = data['target'][1:]
+#     eval_df = pd.DataFrame(target, columns=columns)
+#     names = eval_df.iloc[:,-2]
 
-@app.websocket("/ws/DescriptionFeedbackProgress")
-async def websocket_endpoint(websocket: WebSocket):
-    """
-    WebSocket 연결을 수락하고 연결된 클라이언트를 관리합니다.
-    """
-    await websocket.accept()
-    connected_clients.add(websocket)
-    # 연결된 클라이언트 추가
-    try:
-        while True:
-            # WebSocket 클라이언트로부터 메시지 수신
-            data = await websocket.receive_text()
-            print(f"Received from client: {data}")
-    except Exception as e:
-        print(f"WebSocket connection error: {e}")
-    finally:
-        connected_clients.remove(websocket)  # 연결 끊긴 클라이언트 제거
-        print("WebSocket disconnected")
+#     feedback_targets = eval_df.iloc[:,-1]
+#     numbers = eval_df.iloc[:,-3]
 
-@app.post("/DescriptionFeedback")
-async def process_data(data : dict):
-    columns = data['target'][0]
-    target = data['target'][1:]
-    eval_df = pd.DataFrame(target, columns=columns)
-    names = eval_df.iloc[:,-2]
-
-    feedback_targets = eval_df.iloc[:,-1]
-    numbers = eval_df.iloc[:,-3]
-
-    print(data['criteria']['integration'])
+#     print(data['criteria']['integration'])
     
-    prompt = ChatPromptTemplate.from_messages([
-        ('system',"""
-        너는 지금부터 학생의 서술형 평가 답변에 대한 피드백을 작성할거야.
+#     prompt = ChatPromptTemplate.from_messages([
+#         ('system',"""
+#         너는 지금부터 학생의 서술형 평가 답변에 대한 피드백을 작성할거야.
     
-        피드백 평가 요소는 다음과 같아 :  {elements}
-        각 평가 요소에 대한 수준별 기준은 다음과 같아. {integration}
+#         피드백 평가 요소는 다음과 같아 :  {elements}
+#         각 평가 요소에 대한 수준별 기준은 다음과 같아. {integration}
 
-        이 외에도 평가에 반영해야 하는 요소는 다음과 같아 : {extra} 
+#         이 외에도 평가에 반영해야 하는 요소는 다음과 같아 : {extra} 
 
-        위 기준을 참고하여 각 평가 요소 별로 수준을 체크해주고, 더 나은 답변을 작성할 수 있도록 피드백을 제공해줘.
+#         위 기준을 참고하여 각 평가 요소 별로 수준을 체크해주고, 더 나은 답변을 작성할 수 있도록 피드백을 제공해줘.
 
-        피드백 양식은 다음과 같아. 만약 평가 요소가 여러개라면 반드시 평가요소별로 피드백을 제공해줘.
-        - 수준 : (평가 요소 - 평가 수준 순서대로 써줘.)
-        - 피드백 : (여기에 학생의 결과물에 대한 피드백을 써줘. 평가 요소가 여러개일 경우, 각각에 대한 피드백을 작성해줘.)
+#         피드백 양식은 다음과 같아. 만약 평가 요소가 여러개라면 반드시 평가요소별로 피드백을 제공해줘.
+#         - 수준 : (평가 요소 - 평가 수준 순서대로 써줘.)
+#         - 피드백 : (여기에 학생의 결과물에 대한 피드백을 써줘. 평가 요소가 여러개일 경우, 각각에 대한 피드백을 작성해줘.)
         
-        """),
-        ('human','피드백을 제공해주어야 하는 학생의 답변은 다음과 같아. : {input}')
-        ])
+#         """),
+#         ('human','피드백을 제공해주어야 하는 학생의 답변은 다음과 같아. : {input}')
+#         ])
     
-    llm = ChatOpenAI(
-    temperature=0.5,
-    model='gpt-4o-mini',
-    verbose=False
-    ) 
+#     llm = ChatOpenAI(
+#     temperature=0.5,
+#     model='gpt-4o-mini',
+#     verbose=False
+#     ) 
 
-    chain = (
-        prompt
-        | llm
-        | StrOutputParser()
-    )
+#     chain = (
+#         prompt
+#         | llm
+#         | StrOutputParser()
+#     )
 
-    feedback_results = {}
-    for i, t in enumerate(feedback_targets) :
-        # WebSocket 상태 전송
-        for websocket in connected_clients:
-            await send_websocket_update(f"현재 {names[i]} 학생에 대한 피드백을 작성하는 중입니다...")
+#     feedback_results = {}
+#     for i, t in enumerate(feedback_targets) :
+#         # WebSocket 상태 전송
+#         for websocket in connected_clients:
+#             await send_websocket_update(f"현재 {names[i]} 학생에 대한 피드백을 작성하는 중입니다...")
 
-        result = await chain.ainvoke({
-        "extra" : data['extra'],
-        "elements" : data['criteria']['elements'],
-        "integration" : data['criteria']['integration'],
-        "input" : t
-        })
-        feedback_results[names[i]] = (str(numbers[i]), t, result)
+#         result = await chain.ainvoke({
+#         "extra" : data['extra'],
+#         "elements" : data['criteria']['elements'],
+#         "integration" : data['criteria']['integration'],
+#         "input" : t
+#         })
+#         feedback_results[names[i]] = (str(numbers[i]), t, result)
         
-        print(names[i],type(names[i]),numbers[i],type(numbers[i]), t, type(t), result, type(result))
+#         print(names[i],type(names[i]),numbers[i],type(numbers[i]), t, type(t), result, type(result))
         
-    for websocket in connected_clients:
-        await send_websocket_update(f"피드백 작성을 완료하였습니다.")
+#     for websocket in connected_clients:
+#         await send_websocket_update(f"피드백 작성을 완료하였습니다.")
 
-    # print(feedback_results)    
-    response = {"status": "success", "result": feedback_results}
-    return response
+#     # print(feedback_results)    
+#     response = {"status": "success", "result": feedback_results}
+#     return response
 
-async def send_websocket_update(message: str):
-    """
-    연결된 모든 WebSocket 클라이언트에 메시지 전송
-    """
-    for websocket in connected_clients:
-        try:
-            await websocket.send_text(message)
-        except Exception as e:
-            print(f"Error sending WebSocket message: {e}")
-            connected_clients.remove(websocket)  # 문제 발생 시 클라이언트 제거
+# async def send_websocket_update(message: str):
+#     """
+#     연결된 모든 WebSocket 클라이언트에 메시지 전송
+#     """
+#     for websocket in connected_clients:
+#         try:
+#             await websocket.send_text(message)
+#         except Exception as e:
+#             print(f"Error sending WebSocket message: {e}")
+#             connected_clients.remove(websocket)  # 문제 발생 시 클라이언트 제거
 
 
 
@@ -295,7 +281,6 @@ async def process_data(data : dict):
     retriever = self_retriever.retriever_load()
 
     examples = retriever.batch([data['topic']])[0]
-    print(examples)
 
     llm = ChatOpenAI(
     temperature=0.5,
@@ -317,6 +302,64 @@ async def process_data(data : dict):
     })
     response = {"status": "success", "result": result}
     return response
+
+@app.websocket("/OfficialDocs-ws")
+async def generate_websocket(websocket: WebSocket):
+    await websocket.accept()
+    data = await websocket.receive()
+    data= json.loads(data['text'])
+
+    try:
+        topic = data.get("topic").strip()
+
+        docs = load_Document().Chroma_select_document("official_document")
+
+        self_retriever = tools.LoadSelfQueryRetriever(docs, 0.5)
+
+        self_retriever.metadata_info([
+                AttributeInfo(
+            name="범주",
+            description="""공문의 범주입니다. 
+            One of ['현장체험학습','학업중단숙려제','학업성적관리위원회','교육과정','평가 도구', '학교생활기록부','방과후학교','학교운영위원회','학교폭력','학교회계','교외체험학습']""",
+            type='string'
+        ),
+        ])
+
+        self_retriever.docs_info("학교에서 공적 업무 처리를 위해 작성하는 공문의 예시")
+
+        retriever = self_retriever.retriever_load()
+
+        examples = retriever.batch([data['topic']])[0]
+        print(examples)
+
+        llm = ChatOpenAI(
+        temperature=0.5,
+        model='gpt-4o-mini',
+        verbose=False
+        ) 
+
+        chain = (
+        official_docs_prompt
+        |llm
+        |StrOutputParser()
+        )
+
+        async for chunk in chain.astream({
+                    "input" : topic,
+                    "context" : examples
+                    }):
+            # 웹소켓을 통해 각 청크 전송
+            await websocket.send_text(chunk)
+        
+        # 스트리밍 종료 신호
+        await websocket.send_text("[END]")
+
+    except Exception as e:
+        # 오류 처리
+        await websocket.send_text(f"Error: {str(e)}")
+    
+    finally:
+        await websocket.close()
 
 @app.post("/ParentNoti")
 async def process_data(data : dict):
@@ -362,6 +405,148 @@ async def process_data(data : dict):
     response = {"status": "success", "result": result}
     return response
 
+@app.websocket("/ParentNoti-ws")
+async def generate_websocket(websocket: WebSocket):
+    await websocket.accept()
+    data = await websocket.receive()
+    data= json.loads(data['text'])
+
+    try:
+        print(data)
+        if data.get("detail") : 
+            detail = data.get("detail").strip()
+        else : 
+            detail = ""
+        topic = data.get("topic").strip()
+
+        docs = load_Document().Chroma_select_document("parent_notification")
+
+        self_retriever = tools.LoadSelfQueryRetriever(docs, 0.5)
+
+        self_retriever.metadata_info([
+                AttributeInfo(
+            name="범주",
+            description="""가정통신문의 범주입니다. 
+            One of ['교육과정 운영','방과후학교, 돌봄교실, 늘봄교실 등', '현장체험학습', '통학버스', '보건, 건강 등', '학교폭력, 안전, 정보 등', '기타']""",
+            type='string'
+        ),
+        ])
+
+        self_retriever.docs_info("학교에서 가정으로 보내는 가정통신문 예시 문서")
+
+        retriever = self_retriever.retriever_load()
+
+        examples = retriever.batch([data['topic']])[0]
+
+        llm = ChatOpenAI(
+        temperature=0.5,
+        model='gpt-4o-mini',
+        verbose=False
+        ) 
+
+        chain = (
+        parent_noti_prompt
+        |llm
+        |StrOutputParser()
+        )
+        # 스트리밍 체인 실행
+
+        async for chunk in chain.astream({
+                "input" : data['topic'],
+                "detail" : data['detail'],
+                "examples" : examples
+                    }):
+            # 웹소켓을 통해 각 청크 전송
+            await websocket.send_text(chunk)
+        
+        # 스트리밍 종료 신호
+        await websocket.send_text("[END]")
+
+    except Exception as e:
+        # 오류 처리
+        await websocket.send_text(f"Error: {str(e)}")
+    
+    finally:
+        await websocket.close()
+
+@app.post("/SafetyPhrase")
+async def process_data(data : dict):
+
+    docs = load_Document().Chroma_select_document("safety_phrase")
+
+    examples = docs.get(where={"영역" : data['area']})['documents'][0]
+
+    llm = ChatOpenAI(
+    temperature=0.5,
+    model='gpt-4o-mini',
+    verbose=False
+    )
+
+    chain = (
+    safety_phrase_prompt
+    |llm
+    |StrOutputParser()
+    )
+    
+    # 비동기 처리 (예: 데이터 처리 시뮬레이션)
+    result = await chain.ainvoke({
+        "detail" : data['detail'],
+        "area" : data['area'],
+        "examples" : examples
+    })
+    response = {"status": "success", "result": result}
+    return response
+
+@app.websocket("/SafetyPhrase-ws")
+async def generate_websocket(websocket: WebSocket):
+    print(123)
+    await websocket.accept()
+    data = await websocket.receive()
+    data= json.loads(data['text'])
+
+
+    try:
+        if data.get("detail") : 
+            detail = data.get("detail").strip()
+        else : 
+            detail = ""
+        area = data.get("area").strip()
+
+        docs = load_Document().Chroma_select_document("safety_phrase")
+
+        examples = docs.get(where={"영역" : area})['documents'][0]
+
+        llm = ChatOpenAI(
+        temperature=0.5,
+        model='gpt-4o-mini',
+        verbose=False
+        )
+
+        chain = (
+        safety_phrase_prompt
+        |llm
+        |StrOutputParser()
+        )
+
+        # 스트리밍 체인 실행
+
+        async for chunk in chain.astream({
+                    "detail" : detail,
+                    "area" : area,
+                    "examples" : examples
+                    }):
+            # 웹소켓을 통해 각 청크 전송
+            await websocket.send_text(chunk)
+        
+        # 스트리밍 종료 신호
+        await websocket.send_text("[END]")
+
+    except Exception as e:
+        # 오류 처리
+        await websocket.send_text(f"Error: {str(e)}")
+    
+    finally:
+        await websocket.close()
 
 
 @app.post("/SubjectRecord")
@@ -391,6 +576,54 @@ async def process_data(data : dict):
     })
     response = {"status": "success", "result": result}
     return response
+
+@app.websocket("/SubjectRecord-ws")
+async def generate_websocket(websocket: WebSocket):
+    await websocket.accept()
+    print(1)
+    data = await websocket.receive()
+    data= json.loads(data['text'])
+
+    try:
+
+        subject = data.get("subject").strip()
+        area = data.get("area").strip()
+        print(data)
+
+        docs = load_Document().Chroma_select_document("subject_record")
+        examples = docs.get(where={"과목" : subject })['documents'][0]
+        print(examples)
+
+        llm = ChatOpenAI(
+            temperature=0.5,
+            model='gpt-4o-mini',
+            verbose=False,
+            streaming=True,
+        )
+
+        chain = (
+            subject_record_prompt
+            |llm
+            |StrOutputParser()
+        )
+
+        # 스트리밍 체인 실행
+
+        async for chunk in chain.astream({"subject": subject, "area": area, "examples" : examples}):
+            # 웹소켓을 통해 각 청크 전송
+            print(chunk)
+            await websocket.send_text(chunk)
+        
+        # 스트리밍 종료 신호
+        await websocket.send_text("[END]")
+
+    except Exception as e:
+        print(e)
+        # 오류 처리
+        await websocket.send_text(f"Error: {str(e)}")
+    
+    finally:
+        await websocket.close()
 
 @app.post("/ExtraSelf")
 async def process_data(data : dict):
@@ -427,6 +660,62 @@ async def process_data(data : dict):
     response = {"status": "success", "result": result}
     return response
 
+@app.websocket("/ExtraSelf-ws")
+async def generate_websocket(websocket: WebSocket):
+    await websocket.accept()
+    print(1)
+    data = await websocket.receive()
+    data= json.loads(data['text'])
+
+    try:
+        print(data)
+        if data.get("custom") : 
+            custom = data.get("custom").strip()
+        else : 
+            custom = ""
+
+        docs = load_Document().Chroma_select_document("extra_record")
+        selections = data['area']
+
+        examples = []
+        for s in selections :
+            s = s.strip()
+            print(s)
+            examples.append(docs.get(where={"영역" : s})['documents'][0])
+
+        area = ', '.join(selections)
+
+        llm = ChatOpenAI(
+        temperature=0.5,
+        model='gpt-4o-mini',
+        verbose=False
+        )
+
+        chain = (
+        extra_record_prompt
+        |llm
+        |StrOutputParser()
+        )
+
+        async for chunk in chain.astream({
+                    "area" : area,
+                    "u_area" : custom,
+                    "examples" : examples
+                    }):
+            # 웹소켓을 통해 각 청크 전송
+            await websocket.send_text(chunk)
+        
+        # 스트리밍 종료 신호
+        await websocket.send_text("[END]")
+
+    except Exception as e:
+        print(e)
+        # 오류 처리
+        await websocket.send_text(f"Error: {str(e)}")
+    
+    finally:
+        await websocket.close()
+
 @app.post("/ExtraClub")
 async def process_data(data : dict):
     print(data)
@@ -462,9 +751,63 @@ async def process_data(data : dict):
     response = {"status": "success", "result": result}
     return response
 
+@app.websocket("/ExtraClub-ws")
+async def generate_websocket(websocket: WebSocket):
+    await websocket.accept()
+    data = await websocket.receive()
+    data= json.loads(data['text'])
+
+    try:
+        print(data)
+        if data.get("custom") : 
+            custom = data.get("custom").strip()
+        else : 
+            custom = ""
+            
+        docs = load_Document().Chroma_select_document("extra_record")
+        selections = data['area']
+
+        examples = []
+        for s in selections :
+            s = s.strip()
+            print(s)
+            examples.append(docs.get(where={"영역" : s})['documents'][0])
+
+        area = ', '.join(selections)
+
+        llm = ChatOpenAI(
+        temperature=0.5,
+        model='gpt-4o-mini',
+        verbose=False
+        )
+
+        chain = (
+        extra_record_prompt
+        |llm
+        |StrOutputParser()
+        )
+
+        async for chunk in chain.astream({
+                    "area" : area,
+                    "u_area" : custom,
+                    "examples" : examples
+                    }):
+            # 웹소켓을 통해 각 청크 전송
+            await websocket.send_text(chunk)
+        
+        # 스트리밍 종료 신호
+        await websocket.send_text("[END]")
+
+    except Exception as e:
+        print(e)
+        # 오류 처리
+        await websocket.send_text(f"Error: {str(e)}")
+    
+    finally:
+        await websocket.close()
+
 @app.post("/ExtraCareer")
 async def process_data(data : dict):
-    print(data)
 
     docs = load_Document().Chroma_select_document("extra_record")
 
@@ -490,6 +833,51 @@ async def process_data(data : dict):
     })
     response = {"status": "success", "result": result}
     return response
+
+@app.websocket("/ExtraCareer-ws")
+async def generate_websocket(websocket: WebSocket):
+    await websocket.accept()
+    data = await websocket.receive()
+    data= json.loads(data['text'])
+
+    try:
+        activities = data.get("activities").strip()
+            
+        docs = load_Document().Chroma_select_document("extra_record")
+
+        examples = []
+        examples.append(docs.get(where={"종류" : "진로"})['documents'][0])
+        examples = ', '.join(examples)
+
+        llm = ChatOpenAI(
+        temperature=0.5,
+        model='gpt-4o-mini',
+        verbose=False
+        )
+
+        chain = (
+        career_prompt
+        |llm
+        |StrOutputParser()
+        )
+
+        async for chunk in chain.astream({
+            "activities" : activities,
+            "examples" : examples,
+                    }):
+            # 웹소켓을 통해 각 청크 전송
+            await websocket.send_text(chunk)
+        
+        # 스트리밍 종료 신호
+        await websocket.send_text("[END]")
+
+    except Exception as e:
+        print(e)
+        # 오류 처리
+        await websocket.send_text(f"Error: {str(e)}")
+    
+    finally:
+        await websocket.close()
 
 @app.post("/StudentFeature")
 async def process_data(data : dict):
@@ -525,6 +913,60 @@ async def process_data(data : dict):
     response = {"status": "success", "result": result}
     return response
 
+
+@app.websocket("/StudentTrait-ws")
+async def generate_websocket(websocket: WebSocket):
+    await websocket.accept()
+    data = await websocket.receive()
+    data= json.loads(data['text'])
+
+    try:
+        traits = data.get("features")
+        custom_traits = data.get("custom_traits")
+        length = data.get("length")
+
+            
+        docs = load_Document().Chroma_select_document("student_feature")
+
+        features = ', '.join(traits)
+
+        examples = []
+        for f in data['features'] :
+            examples.append(docs.get(where={"영역" : f})['documents'][0])
+        examples = ', '.join(examples)
+
+        llm = ChatOpenAI(
+        temperature=0.5,
+        model='gpt-4o-mini',
+        verbose=False
+        )
+
+        chain = (
+        student_feature_prompt
+        |llm
+        |StrOutputParser()
+        )
+
+        async for chunk in chain.astream({
+            "description" : traits,
+            "examples" : examples,
+            "length" : length,
+            "extra" : custom_traits
+                    }):
+            # 웹소켓을 통해 각 청크 전송
+            await websocket.send_text(chunk)
+        
+        # 스트리밍 종료 신호
+        await websocket.send_text("[END]")
+
+    except Exception as e:
+        print(e)
+        # 오류 처리
+        await websocket.send_text(f"Error: {str(e)}")
+    
+    finally:
+        await websocket.close()
+
 @app.post("/StudentFeatureSimple")
 async def process_data(data : dict):
     print(data)
@@ -556,6 +998,54 @@ async def process_data(data : dict):
     response = {"status": "success", "result": result}
     return response
 
+@app.websocket("/StudentTraitSimple-ws")
+async def generate_websocket(websocket: WebSocket):
+    await websocket.accept()
+    data = await websocket.receive()
+    data= json.loads(data['text'])
+
+    try:
+        custom_traits = data.get("custom_traits")
+
+        docs = load_Document().Chroma_select_document("student_feature")
+
+        examples = docs.as_retriever().batch([custom_traits])[0]
+
+        example_data = []
+        for i in examples :
+            example_data.append(i.page_content)
+        example_data = "\n".join(example_data)
+
+        llm = ChatOpenAI(
+        temperature=0.5,
+        model='gpt-4o-mini',
+        verbose=False
+        )
+
+        chain = (
+        student_feature_simple_prompt
+        |llm
+        |StrOutputParser()
+        )
+
+        async for chunk in chain.astream({
+            "description" : custom_traits,
+            "examples" : examples,
+                    }):
+            # 웹소켓을 통해 각 청크 전송
+            await websocket.send_text(chunk)
+        
+        # 스트리밍 종료 신호
+        await websocket.send_text("[END]")
+
+    except Exception as e:
+        print(e)
+        # 오류 처리
+        await websocket.send_text(f"Error: {str(e)}")
+    
+    finally:
+        await websocket.close()
+
 @app.post("/StudentFeatureRecord")
 async def process_data(data : dict):
     print(data)
@@ -578,6 +1068,45 @@ async def process_data(data : dict):
     })
     response = {"status": "success", "result": result}
     return response
+
+@app.websocket("/StudentTraitRecord-ws")
+async def generate_websocket(websocket: WebSocket):
+    await websocket.accept()
+    data = await websocket.receive()
+    data= json.loads(data['text'])
+
+    try:
+        trait = data.get("trait")
+
+        
+        llm = ChatOpenAI(
+        temperature=0.5,
+        model='gpt-4o-mini',
+        verbose=False
+        )
+
+        chain = (
+        student_feature_record_prompt
+        |llm
+        |StrOutputParser()
+        )
+
+        async for chunk in chain.astream({
+        "input": trait
+                    }):
+            # 웹소켓을 통해 각 청크 전송
+            await websocket.send_text(chunk)
+        
+        # 스트리밍 종료 신호
+        await websocket.send_text("[END]")
+
+    except Exception as e:
+        print(e)
+        # 오류 처리
+        await websocket.send_text(f"Error: {str(e)}")
+    
+    finally:
+        await websocket.close()
 
 
 @app.post("/AssessmentPlanning")
@@ -663,3 +1192,64 @@ async def process_data(data : dict):
     })
     response = {"status": "success", "result": result}
     return response
+
+@app.websocket("/PreschoolTrait-ws")
+async def generate_websocket(websocket: WebSocket):
+    await websocket.accept()
+    data = await websocket.receive()
+    data= json.loads(data['text'])
+
+    try:
+        age = data.get("age")
+        arealevel_dict = data.get('arealevel')
+
+        docs = load_Document().Chroma_select_document("preschool_trait")
+
+        examples = []
+        traits = []  
+        for area, level in arealevel_dict.items():
+            traits.append(f"해당 학생의 {area} 영역은 {level} 수준입니다.")
+            filter_criteria = {
+                        "$and": [
+                            {"나이": {"$eq": age}},
+                            {"영역": {"$eq": area}},
+                            {"수준": {"$eq": level}}
+                        ]
+                    }
+            
+            print(filter_criteria)
+            examples.append(docs.get(where=filter_criteria)['documents'][0])
+        traits = '\n'.join(traits)
+        examples = ', '.join(examples)
+
+        llm = ChatOpenAI(
+        temperature=0.5,
+        model='gpt-4o-mini',
+        verbose=False
+        )
+
+        chain = (
+        preschool_trait_prompt
+        |llm
+        |StrOutputParser()
+        )
+    
+
+        async for chunk in chain.astream({
+        "age" : age,
+        "traits": traits,
+        "examples" : examples
+                    }):
+            # 웹소켓을 통해 각 청크 전송
+            await websocket.send_text(chunk)
+        
+        # 스트리밍 종료 신호
+        await websocket.send_text("[END]")
+
+    except Exception as e:
+        print(e)
+        # 오류 처리
+        await websocket.send_text(f"Error: {str(e)}")
+    
+    finally:
+        await websocket.close()
