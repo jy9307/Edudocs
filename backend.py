@@ -37,11 +37,6 @@ class FeatureData(BaseModel) :
     examples : str
     extra : str
 
-class SubjectData(BaseModel) :
-    area : str
-    subject : str
-    examples : str
-
 def get_text(file_obj):
     extractor = tools.HWPExtractor(file_obj)  # file_obj는 BytesIO
     return extractor.get_text()
@@ -56,135 +51,6 @@ app.add_middleware(
     allow_methods=["*"],                     # 허용할 HTTP 메서드 (예: GET, POST 등)``
     allow_headers=["*"],                     # 허용할 HTTP 헤더
 )
-
-# @app.post("/DescriptionFeedback")
-# async def process_data(data : dict):
-#     columns = data['target'][0]
-#     target = data['target'][1:]
-#     eval_df = pd.DataFrame(target, columns=columns)
-#     names = eval_df.iloc[:,-2]
-
-#     feedback_targets = eval_df.iloc[:,-1]
-#     numbers = eval_df.iloc[:,-3]
-
-#     print(data['criteria']['integration'])
-    
-#     prompt = ChatPromptTemplate.from_messages([
-#         ('system',"""
-#         너는 지금부터 학생의 서술형 평가 답변에 대한 피드백을 작성할거야.
-    
-#         피드백 평가 요소는 다음과 같아 :  {elements}
-#         각 평가 요소에 대한 수준별 기준은 다음과 같아. {integration}
-
-#         이 외에도 평가에 반영해야 하는 요소는 다음과 같아 : {extra} 
-
-#         위 기준을 참고하여 각 평가 요소 별로 수준을 체크해주고, 더 나은 답변을 작성할 수 있도록 피드백을 제공해줘.
-
-#         피드백 양식은 다음과 같아. 만약 평가 요소가 여러개라면 반드시 평가요소별로 피드백을 제공해줘.
-#         - 수준 : (평가 요소 - 평가 수준 순서대로 써줘.)
-#         - 피드백 : (여기에 학생의 결과물에 대한 피드백을 써줘. 평가 요소가 여러개일 경우, 각각에 대한 피드백을 작성해줘.)
-        
-#         """),
-#         ('human','피드백을 제공해주어야 하는 학생의 답변은 다음과 같아. : {input}')
-#         ])
-    
-#     llm = ChatOpenAI(
-#     temperature=0.5,
-#     model='gpt-4o-mini',
-#     verbose=False
-#     ) 
-
-#     chain = (
-#         prompt
-#         | llm
-#         | StrOutputParser()
-#     )
-
-#     feedback_results = {}
-#     for i, t in enumerate(feedback_targets) :
-#         # WebSocket 상태 전송
-#         for websocket in connected_clients:
-#             await send_websocket_update(f"현재 {names[i]} 학생에 대한 피드백을 작성하는 중입니다...")
-
-#         result = await chain.ainvoke({
-#         "extra" : data['extra'],
-#         "elements" : data['criteria']['elements'],
-#         "integration" : data['criteria']['integration'],
-#         "input" : t
-#         })
-#         feedback_results[names[i]] = (str(numbers[i]), t, result)
-        
-#         print(names[i],type(names[i]),numbers[i],type(numbers[i]), t, type(t), result, type(result))
-        
-#     for websocket in connected_clients:
-#         await send_websocket_update(f"피드백 작성을 완료하였습니다.")
-
-#     # print(feedback_results)    
-#     response = {"status": "success", "result": feedback_results}
-#     return response
-
-# async def send_websocket_update(message: str):
-#     """
-#     연결된 모든 WebSocket 클라이언트에 메시지 전송
-#     """
-#     for websocket in connected_clients:
-#         try:
-#             await websocket.send_text(message)
-#         except Exception as e:
-#             print(f"Error sending WebSocket message: {e}")
-#             connected_clients.remove(websocket)  # 문제 발생 시 클라이언트 제거
-
-
-
-@app.post("/DescriptionFeedbackTEST")
-async def process_data(data : dict):
-
-    print(data['criteria']['integration'])
-    prompt = ChatPromptTemplate.from_messages([
-        ('system',"""
-        너는 지금부터 학생의 서술형 평가 답변에 대한 피드백을 작성할거야.
-    
-        피드백 평가 요소는 다음과 같아 :  {elements}
-        각 평가 요소에 대한 수준별 기준은 다음과 같아. {integration}
-
-        이 외에도 평가에 반영해야 하는 요소는 다음과 같아 : {extra} 
-
-        평가 요소에 대한 수준별 기준을 참고하여 각 평가 요소 별로 수준을 체크해주고, 더 나은 답변을 작성할 수 있도록 피드백을 제공해줘.
-        수준을 체크할때는 엄격하게 평가해주어야 해.
-
-        피드백 양식은 다음과 같아. 만약 평가 요소가 여러개라면 반드시 평가요소별로 피드백을 제공해줘.
-        - 수준 : (평가 요소 - 평가 수준 순서대로 써줘.)
-        - 피드백 : (여기에 학생의 결과물에 대한 피드백을 써줘. 평가 요소가 여러개일 경우, 각각에 대한 피드백을 작성해줘.)
-        
-        """),
-        ('human','피드백을 제공해주어야 하는 학생의 답변은 다음과 같아. : {input}')
-    ])
-
-    print(prompt)
-
-
-    llm = ChatOpenAI(
-    temperature=0.5,
-    model='gpt-4o-mini',
-    verbose=False
-    ) 
-
-    chain = (
-        prompt
-        | llm
-        | StrOutputParser()
-    )
-    results = []
-    for t in data['target'] :
-        result = await chain.ainvoke({
-        "extra" : data['extra'],
-        "elements" : data['criteria']['elements'],
-        "integration" : data['criteria']['integration'],
-        "input" : t
-        })
-        results.append(result)
-    response = {"status": "success", "result": results}
-    return response
 
 @app.post("/WorkLaw")
 async def process_data(data : dict):
@@ -228,6 +94,66 @@ async def process_data(data : dict):
     })
     response = {"status": "success", "result": result}
     return response
+
+@app.websocket("/WorkLaw-ws")
+async def generate_websocket(websocket: WebSocket):
+    await websocket.accept()
+    data = await websocket.receive()
+    data= json.loads(data['text'])
+
+    try:
+        print(data)
+
+        query = dataget("query").strip()
+
+        docs = load_Document().Chroma_select_document("work_law")
+
+        self_retriever = tools.LoadSelfQueryRetriever(docs, 0.5)
+
+        self_retriever.metadata_info([
+                AttributeInfo(
+            name="cluase_title",
+            description="""법률 항목의 이름입니다.
+            One of ['휴직', '특별연수', '조교의 임용', '승진', '휴가의 종류', '적용범위', '명예퇴직', '징계위원회의 설치', '근무시간 면제 시간의 사용', '인사위원회의 기능', '인사교류', '당직 및 비상근무', '목적', '연수기관 및 근무장소 외에서의 연수', '초빙교원', '연가계획 및 승인', '임용의 원칙', '교권의 존중과 신분보장', '보직 등 관리의 원칙', '벌칙', '대학의 장 등의 임기', '공립대학의 장 등의 임용', '시간외근무 및 공휴일 등 근무', '근무기강의 확립', '지방교육공무원 인사위원회', '연수와 교재비', '정년', '휴가기간 중의 토요일 또는 공휴일', '겸직 허가', '근무시간 등의 변경', '교장·교감 등의 자격', '영리 업무의 금지', '정의', '정치적 행위', '인사위원회의 설치', '교육감 소속 교육전문직원의 채용 및 전직 등', '특별휴가', '연가 일수', '보수결정의 원칙', '교수 등의 임용', '선서', '경력경쟁채용 등', '출장공무원', '국가공무원법과의 관계', '사실상 노무에 종사하는 공무원', '겸직 금지', '전직 등의 제한', '지방공무원법과의 관계', '병가', '교원의 불체포특권', '연수 실적 및 근무성적의 평정', '대학인사위원회', '휴직기간 등', '공립대학 교육공무원의 고충처리', '휴가기간의 초과', '연가 일수에서의 공제', '징계사유의 시효에 관한 특례', '보수에 관한 규정', '해직된 공무원의 근무', '장학관 등의 임용', '과태료', '교수 등의 자격', '연수의 기회균등', '인사기록', '겸임', '대학의 장의 임용', '공가', '교육전문직원의 자격', '고위공직자의 공무 외 국외여행', '우수 교육공무원 특별 승진', '승진후보자 명부', '친절ㆍ공정한 업무 처리', '지방교육전문직원 인사위원회', '교감ㆍ교사ㆍ장학사 등의 임용', '고충처리', '임용권의 위임 등', '강임자의 우선승진임용 제한', '파견근무', '교육연수기관에의 교원 배치', '근무시간 등', '신체검사', '연수기관의 설치', '교사의 신규채용 등', '징계의결의 요구', '교사의 자격', '교육감 소속 교육전문직원의 임용', '기간제교원', '현업 공무원 등의 근무시간과 근무일', '부총장ㆍ대학원장ㆍ단과대학장의 보직']""",
+            type='string'
+        ),
+        ])
+
+        self_retriever.docs_info("학교에서 근무하는 공무원(교원)이 지켜야 하는 법률을 담고 있습니다.")
+
+        retriever = self_retriever.retriever_load()
+
+        laws = retriever.batch([query])[0]
+
+        llm = ChatOpenAI(
+        temperature=0.5,
+        model='gpt-4o-mini',
+        verbose=False
+        ) 
+
+        chain = (
+        work_law_prompt
+        |llm
+        |StrOutputParser()
+        )
+
+        async for chunk in chain.astream({
+                "input" : data['topic'],
+                "detail" : data['detail'],
+                "examples" : examples
+                    }):
+            # 웹소켓을 통해 각 청크 전송
+            await websocket.send_text(chunk)
+        
+        # 스트리밍 종료 신호
+        await websocket.send_text("[END]")
+
+    except Exception as e:
+        # 오류 처리
+        await websocket.send_text(f"Error: {str(e)}")
+    
+    finally:
+        await websocket.close()
 
 
 @app.post("/CommendDocs")

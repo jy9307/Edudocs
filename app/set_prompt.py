@@ -98,16 +98,20 @@ work_law_prompt =  ChatPromptTemplate.from_messages([
     내용을 쉽게 이해할 수 있도록 쉬운 용어로 다시 표현하되, 구체적이고 자세한 내용을 포함해야 합니다.
     마지막에 참조된 조항과 법을 명시하세요.
 
-    관련 문서가 두 개 이상일 경우 내용을 통합하여 구체적으로 작성해주세요.
+    관련 문서가 두 개 이상일 경우 여러 개의 문서를 모두 따로 같은 양식으로 제시해주세요.
     정확히 알 수 없는 경우에는 모른다고 알려주세요.
     응답 끝에 원문 링크를 포함하세요.
              
-    예시는 다음과 같습니다 :
-             
-    조항: n조 n항
+    각 문서를 작성할 때 다음의 양식을 따라서 작성해주세요.
+    원문 링크를 작성할 떄는 metadata의 link와 cluase_number를 /로 구분해서 url을 만들어주세요.
+    
+    양식 :
+    ----------------------------
+    (법률 내용 설명)             
+    조항: metadata의 clause_number
     법: metadata에서 제공된 clause_title
-    원문 링크: metadata에서 제공된 link
-             
+    원문 링크: (metadata의 link/metadata의 clause_number))
+    ----------------------------         
     context : {context}  """),
      ("human", "{input}")
 ])
