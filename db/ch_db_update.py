@@ -49,7 +49,7 @@ for d in docs:
     number = lines[1].split("(")[0]
     titles.append(title)
 
-    if d.metadata["source"] == "work_laws_for_officers.txt" :
+    if d.metadata["source"] == "txt/work_laws_for_officers.txt" :
         d.metadata['law_title'] = '국가공무원 복무규정'
         d.metadata['cluase_title'] = title
         d.metadata['clause_number'] = number

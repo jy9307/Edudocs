@@ -8,8 +8,6 @@ class UrlExtractor() :
     def __init__(self,url) :
         self.response = requests.get(url)
         self.response.raise_for_status()
-
-
         return
 
     def law_url_extract(self) :

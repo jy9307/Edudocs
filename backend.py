@@ -102,9 +102,8 @@ async def generate_websocket(websocket: WebSocket):
     data= json.loads(data['text'])
 
     try:
-        print(data)
 
-        query = dataget("query").strip()
+        query = data.get("query").strip()
 
         docs = load_Document().Chroma_select_document("work_law")
 
@@ -112,7 +111,7 @@ async def generate_websocket(websocket: WebSocket):
 
         self_retriever.metadata_info([
                 AttributeInfo(
-            name="cluase_title",
+            name="clause_title",
             description="""법률 항목의 이름입니다.
             One of ['휴직', '특별연수', '조교의 임용', '승진', '휴가의 종류', '적용범위', '명예퇴직', '징계위원회의 설치', '근무시간 면제 시간의 사용', '인사위원회의 기능', '인사교류', '당직 및 비상근무', '목적', '연수기관 및 근무장소 외에서의 연수', '초빙교원', '연가계획 및 승인', '임용의 원칙', '교권의 존중과 신분보장', '보직 등 관리의 원칙', '벌칙', '대학의 장 등의 임기', '공립대학의 장 등의 임용', '시간외근무 및 공휴일 등 근무', '근무기강의 확립', '지방교육공무원 인사위원회', '연수와 교재비', '정년', '휴가기간 중의 토요일 또는 공휴일', '겸직 허가', '근무시간 등의 변경', '교장·교감 등의 자격', '영리 업무의 금지', '정의', '정치적 행위', '인사위원회의 설치', '교육감 소속 교육전문직원의 채용 및 전직 등', '특별휴가', '연가 일수', '보수결정의 원칙', '교수 등의 임용', '선서', '경력경쟁채용 등', '출장공무원', '국가공무원법과의 관계', '사실상 노무에 종사하는 공무원', '겸직 금지', '전직 등의 제한', '지방공무원법과의 관계', '병가', '교원의 불체포특권', '연수 실적 및 근무성적의 평정', '대학인사위원회', '휴직기간 등', '공립대학 교육공무원의 고충처리', '휴가기간의 초과', '연가 일수에서의 공제', '징계사유의 시효에 관한 특례', '보수에 관한 규정', '해직된 공무원의 근무', '장학관 등의 임용', '과태료', '교수 등의 자격', '연수의 기회균등', '인사기록', '겸임', '대학의 장의 임용', '공가', '교육전문직원의 자격', '고위공직자의 공무 외 국외여행', '우수 교육공무원 특별 승진', '승진후보자 명부', '친절ㆍ공정한 업무 처리', '지방교육전문직원 인사위원회', '교감ㆍ교사ㆍ장학사 등의 임용', '고충처리', '임용권의 위임 등', '강임자의 우선승진임용 제한', '파견근무', '교육연수기관에의 교원 배치', '근무시간 등', '신체검사', '연수기관의 설치', '교사의 신규채용 등', '징계의결의 요구', '교사의 자격', '교육감 소속 교육전문직원의 임용', '기간제교원', '현업 공무원 등의 근무시간과 근무일', '부총장ㆍ대학원장ㆍ단과대학장의 보직']""",
             type='string'
@@ -122,7 +121,6 @@ async def generate_websocket(websocket: WebSocket):
         self_retriever.docs_info("학교에서 근무하는 공무원(교원)이 지켜야 하는 법률을 담고 있습니다.")
 
         retriever = self_retriever.retriever_load()
-
         laws = retriever.batch([query])[0]
 
         llm = ChatOpenAI(
@@ -138,9 +136,8 @@ async def generate_websocket(websocket: WebSocket):
         )
 
         async for chunk in chain.astream({
-                "input" : data['topic'],
-                "detail" : data['detail'],
-                "examples" : examples
+                "input" : query,
+                "laws" : laws
                     }):
             # 웹소켓을 통해 각 청크 전송
             await websocket.send_text(chunk)

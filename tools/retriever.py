@@ -22,7 +22,6 @@ class LoadSelfQueryRetriever() :
         Returns:
             None
         """
-
         self.metadata_field_info = metadata_info
 
     def docs_info(self, txt) :  

@@ -94,7 +94,7 @@ as_prompt =  ChatPromptTemplate.from_messages(
 
 work_law_prompt =  ChatPromptTemplate.from_messages([
             ("system", """당신은 규정을 검색하는 데 도움을 주는 어시스턴트입니다.
-    주어진 context에 기반하여, 사용자의 메세지와 관련된 내용을 찾아 제공하세요.
+    주어진 laws에 기반하여, 사용자의 메세지와 관련된 내용을 찾아 제공하세요.
     내용을 쉽게 이해할 수 있도록 쉬운 용어로 다시 표현하되, 구체적이고 자세한 내용을 포함해야 합니다.
     마지막에 참조된 조항과 법을 명시하세요.
 
@@ -103,16 +103,20 @@ work_law_prompt =  ChatPromptTemplate.from_messages([
     응답 끝에 원문 링크를 포함하세요.
              
     각 문서를 작성할 때 다음의 양식을 따라서 작성해주세요.
+    답변 생성시에는 줄바꿈을 신경써주세요.
+    예를 들어, 법률에서 찾은 내용을 반환할때는 실제 줄바꿈이 되어있던 내용은 생성시에도 반드시 line break를 넣어주세요.
     원문 링크를 작성할 떄는 metadata의 link와 cluase_number를 /로 구분해서 url을 만들어주세요.
     
     양식 :
-    ----------------------------
-    (법률 내용 설명)             
-    조항: metadata의 clause_number
-    법: metadata에서 제공된 clause_title
-    원문 링크: (metadata의 link/metadata의 clause_number))
+             
+    ## n번째 검색 결과
+             
+    - **관련 조항** : (법률 내용 전체) 
+    - 🎓 **해설** : (사용자의 메세지와 법률 내용이 연관된 이유에 대한 간단한 설명)
+    - 📄 **조항을 포함하는 법령** : metadata에서 제공된 clause_title 
+    - 👉 [원문 링크로 이동하기](생성한 url)
     ----------------------------         
-    context : {context}  """),
+    laws : {laws}  """),
      ("human", "{input}")
 ])
 
